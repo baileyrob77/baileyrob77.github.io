@@ -223,6 +223,7 @@ input:focus,textarea:focus{border-color:var(--p1)}
 <input type="date" id="auth-dob" max="2013-10-11"/>
 </div>
 <button class="btn" id="auth-submit">Sign Up</button>
+<button class="btn btn-sec" id="auth-forgot" style="display:none">Forgot password?</button>
 <button class="btn btn-sec" id="auth-toggle">Have an account? Log in</button>
 <button class="btn btn-sec" id="auth-cancel">Cancel</button>
 </div>
@@ -413,7 +414,31 @@ document.getElementById('auth-toggle').onclick=()=>{
   document.getElementById('auth-username').style.display=mode==='signup'?'block':'none';
   document.getElementById('auth-signup-extra').style.display=mode==='signup'?'block':'none';
   document.getElementById('auth-toggle').textContent=mode==='signup'?'Have an account? Log in':'New here? Sign up';
+  document.getElementById('auth-forgot').style.display=mode==='login'?'block':'none';
 };
+// ---------- password reset ----------
+let resetMode=false;
+document.getElementById('auth-forgot').onclick=async()=>{
+  const email=document.getElementById('auth-email').value.trim();
+  if(!email){alert('Type your email above first, then tap Forgot password.');return}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  if(error){alert(error.message);return}
+  alert('Check your email for a reset link.');
+};
+sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    resetMode=true;
+    mode='login';
+    openAuth();
+    document.getElementById('auth-title').textContent='Set a new password';
+    document.getElementById('auth-submit').textContent='Save new password';
+    document.getElementById('auth-username').style.display='none';
+    document.getElementById('auth-signup-extra').style.display='none';
+    document.getElementById('auth-toggle').style.display='none';
+    document.getElementById('auth-forgot').style.display='none';
+    alert('Type your new password below, then tap Save new password.');
+  }
+});
 // ---------- age gate (COPPA: 13+) ----------
 function calcAge(dobStr){
   const dob=new Date(dobStr+'T00:00:00');const now=new Date();
@@ -473,6 +498,19 @@ document.getElementById('auth-submit').onclick=async()=>{
   const pass=document.getElementById('auth-pass').value;
   const btn=document.getElementById('auth-submit');btn.disabled=true;
   try{
+    if(resetMode){
+      if(!pass){alert('Type a new password');return}
+      const {error}=await sb.auth.updateUser({password:pass});
+      if(error)throw error;
+      resetMode=false;
+      document.getElementById('auth-toggle').style.display='';
+      document.getElementById('auth-title').textContent='Welcome back';
+      document.getElementById('auth-submit').textContent='Log In';
+      alert('Password saved — you are logged in.');
+      document.getElementById('auth-modal').classList.remove('open');
+      await refreshAuth();loadFeed();
+      return;
+    }
     if(mode==='signup'){
       const username=document.getElementById('auth-username').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
       if(!username){alert('Pick a username');return}
@@ -957,7 +995,7 @@ async function loadConversations(){
   const el=document.getElementById('convo-list');
   document.getElementById('chat-view').classList.add('hidden');
   el.classList.remove('hidden');
-  if(!user){el.innerHTML='<div class="card"><h2>Messages</h2><p style="color:var(--muted);margin-bottom:16px">Log in to send video messages.</p><button class="btn" onclick="openAuth()">Join The Deaf Pulse</button></div>';return}
+  if(!user){el.innerHTML='<div class="card"><h2>Messages</h2><p style="color:var(--muted);margin-bottom:16px">Log in to send video messages.</p><button class="btn" onclick="openAuth()">Join / Log in</button></div>';return}
   el.innerHTML='<div class="empty">Loading chats…</div>';
   const {data:members}=await sb.from('pulse_conversation_members').select('conversation_id').eq('user_id',user.id);
   if(!members||!members.length){el.innerHTML='<div class="empty">No conversations yet.<br/>Tap ＋ New chat to start one! 💬</div>';return}
