@@ -400,7 +400,7 @@ async function refreshAuth(){
   await ensureProfile();
   document.getElementById('hdr-auth').innerHTML=user
     ?'<span style="font-size:13px;color:var(--muted)">'+esc(user.email)+'</span>'
-    :'<button class="btn" style="width:auto;padding:8px 18px" onclick="openAuth()">Join</button>';
+    :'<button class="btn" style="width:auto;padding:8px 18px" onclick="openAuth()">Join / Log in</button>';
   document.getElementById('fab').style.display=user?'block':'none';
   refreshNotifBadge();
 }
@@ -879,7 +879,7 @@ function setCountry(c){newsCountry=c;loadNews()}
 // ---------- profile ----------
 async function loadProfile(){
   const el=document.getElementById('profile');
-  if(!user){el.innerHTML='<div class="card"><h2>Your profile</h2><p style="color:var(--muted);margin-bottom:16px">Join to create your profile and start posting.</p><button class="btn" onclick="openAuth()">Join The Deaf Pulse</button></div>';return}
+  if(!user){el.innerHTML='<div class="card"><h2>Your profile</h2><p style="color:var(--muted);margin-bottom:16px">Log in or join to see your profile and start posting.</p><button class="btn" onclick="openAuth()">Join / Log in</button></div>';return}
   const {data:prof}=await sb.from('pulse_profiles').select('*').eq('id',user.id).single();
   const {data:posts}=await sb.from('pulse_posts').select('id').eq('user_id',user.id);
   const {data:follows}=await sb.from('pulse_follows').select('id').eq('follower_id',user.id);
