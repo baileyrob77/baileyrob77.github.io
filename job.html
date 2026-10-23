@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">Jobs — DeafWork</title>
 <meta name="description" content="Deaf and ASL-friendly job listings. Real jobs from Deaf-friendly employers.">
-<link id="canonical" rel="canonical" href="https://deafwork.netlify.app/job.html">
+<link id="canonical" rel="canonical" href="/job.html">
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0b3d62;background:#f0f6fb}
 body{margin:0;padding:0}
@@ -55,7 +55,7 @@ footer{text-align:center;color:#7a94a8;font-size:13px;padding:32px}
 </head>
 <body>
 <header>
-  <a href="https://deafwork.netlify.app/">🤟 DeafWork</a>
+  <a href="/">🤟 DeafWork</a>
   <span class="tag">The job board built for the Deaf community</span>
 </header>
 <main id="app"><div class="loading">Loading…</div></main>
@@ -81,7 +81,9 @@ footer{text-align:center;color:#7a94a8;font-size:13px;padding:32px}
 var SUPABASE_URL = "https://vdxncfcgtguzmsncjovl.supabase.co";
 var SUPABASE_ANON_KEY = "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap";
 
-var SITE = "https://deafwork.netlify.app";
+// Navigation base: host-relative so links work on ANY host (Netlify, GitHub
+// Pages mirror, future domain) — never hardcode one site's domain here.
+var SITE = "";
 var app = document.getElementById("app");
 var params = new URLSearchParams(location.search);
 var jobId = params.get("id");
@@ -125,7 +127,7 @@ async function main(){
   var company=emp.company_name||"Deaf-friendly employer";
   var datePosted=new Date(job.created_at).toISOString().slice(0,10);
   var validThrough=new Date(new Date(job.created_at).getTime()+90*864e5).toISOString().slice(0,10);
-  var pageUrl=SITE+"/job.html?id="+job.id;
+  var pageUrl=location.origin+"/job.html?id="+job.id;
 
   document.getElementById("page-title").textContent=job.title+" at "+company+" — DeafWork";
   document.getElementById("canonical").href=pageUrl;
@@ -136,6 +138,17 @@ async function main(){
   if(job.no_phone_application)badges.push('<span class="badge">No phone required</span>');
   if(job.text_first)badges.push('<span class="badge">Text-first</span>');
 
+  // Apply path: use the employer's own application_url when the job has one.
+  var applyUrl=(job.application_url||"").trim();
+  var applyBtn;
+  if(applyUrl&&/^https?:\/\//i.test(applyUrl)){
+    applyBtn='<a class="apply" href="'+esc(applyUrl)+'" target="_blank" rel="noopener">Apply on company site ↗</a>';
+  }else if(applyUrl&&applyUrl.indexOf("@")>-1){
+    applyBtn='<a class="apply" href="mailto:'+esc(applyUrl)+'">Email your application</a>';
+  }else{
+    applyBtn='<a class="apply" href="/">Find &amp; apply on DeafWork</a>';
+  }
+
   app.innerHTML=
     '<div class="card">'+
     '<h1>'+esc(job.title)+'</h1>'+
@@ -145,9 +158,9 @@ async function main(){
     (fmtPay(job.pay_min,job.pay_max)?'<div class="pay">'+esc(fmtPay(job.pay_min,job.pay_max))+'</div>':"")+
     '<div class="desc">'+esc(job.description||"")+'</div>'+
     (job.accommodations?'<div class="meta"><strong>Accommodations:</strong> '+esc(job.accommodations)+'</div>':"")+
-    '<a class="apply" href="'+SITE+'/">Apply on DeafWork</a>'+
+    applyBtn+
     '<button class="msgbtn" id="msgbtn">✉️ Message this employer</button>'+
-    '<div class="meta" style="margin-top:12px">Save and apply with your free DeafWork account. No phone calls needed — send a message through DeafWork.</div>'+
+    '<div class="meta" style="margin-top:12px">Apply with your free DeafWork account. No phone calls needed — send a message through DeafWork.</div>'+
     '<div style="margin-top:18px;text-align:center"><a id="reportlink" href="#" style="font-size:13px;color:#7a94a8">🚩 Report this listing</a></div>'+
     '</div>';
   document.getElementById("msgbtn").addEventListener("click",function(){openMsgModal(job.title,company);});
@@ -217,14 +230,29 @@ function openMsgModal(jobTitle, company){
   document.getElementById("msgform").addEventListener("submit",function(e){
     e.preventDefault();
     var form=e.target;
+    var d={name:document.getElementById("m-name").value.trim(),
+           email:document.getElementById("m-email").value.trim(),
+           msg:document.getElementById("m-msg").value.trim()};
+    // Failure path: never claim success. Offer a prefilled email to DeafWork
+    // with the visitor's message preserved, so nothing they typed is lost.
+    function msgFail(){
+      var body="Hi DeafWork team,\n\nPlease pass this message to "+company+" about the job \""+jobTitle+"\".\n\nFrom: "+d.name+" ("+d.email+")\n\n"+d.msg;
+      back.querySelector(".modal").innerHTML=
+        '<div class="sent" style="color:#a33">That didn\'t send — please use the email option below.</div>'+
+        '<p style="font-size:14px;color:#5a7a92">Your message is already filled into the email — just tap the button and press send:</p>'+
+        '<p style="text-align:center"><a class="apply" href="mailto:DeafWork2026@gmail.com?subject='+
+        encodeURIComponent("Message for "+company+": "+jobTitle)+
+        '&body='+encodeURIComponent(body)+'">📧 Email your message to DeafWork</a></p>'+
+        '<p style="text-align:center"><button type="button" id="msgfailclose" style="background:#f0f6fb;color:#0b3d62;font-weight:700;border:none;border-radius:12px;padding:12px 24px;font-size:15px;cursor:pointer">Close</button></p>';
+      document.getElementById("msgfailclose").addEventListener("click",function(){document.body.removeChild(back);});
+    }
     fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},
       body:new URLSearchParams(new FormData(form)).toString()})
-    .then(function(){
+    .then(function(r){
+      if(!r.ok)throw new Error("send failed");
       back.querySelector(".modal").innerHTML='<div class="sent">✅ Message sent!<br><span style="font-weight:400;font-size:15px;color:#5a7a92">The employer will reply to your email.</span></div>';
     })
-    .catch(function(){
-      back.querySelector(".modal").innerHTML='<div class="sent" style="color:#a33">Something went wrong — please try again.</div>';
-    });
+    .catch(msgFail);
   });
 }
 
