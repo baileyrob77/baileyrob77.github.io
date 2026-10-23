@@ -1,0 +1,7 @@
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.clarity.ms https://cdn.jsdelivr.net; connect-src 'self' https://vdxncfcgtguzmsncjovl.supabase.co https://*.clarity.ms https://www.clarity.ms; img-src 'self' data: blob: https:; media-src 'self' blob: https://vdxncfcgtguzmsncjovl.supabase.co; style-src 'self' 'unsafe-inline'; font-src 'self' data: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://meet.jit.si; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://buy.stripe.com

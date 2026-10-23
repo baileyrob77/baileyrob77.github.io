@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Post a Job — DeafWork | Deaf Job Board</title>
+<meta name="description" content="Post your job on DeafWork and reach Deaf, hard-of-hearing, and DeafBlind talent. First listing free for 30 days. We review every listing within 24 hours."/>
+<meta property="og:title" content="Post a Job on DeafWork"/>
+<meta property="og:description" content="Reach Deaf talent. First listing free for 30 days."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://deafwork.netlify.app/post-a-job.html"/>
+<link rel="canonical" href="https://deafwork.netlify.app/post-a-job.html"/>
+<meta name="robots" content="noindex"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0b3d62;background:#f0f6fb}
+body{margin:0;padding:0}
+header{background:#0b3d62;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+header a{color:#fff;text-decoration:none;font-weight:700}
+.hero{text-align:center;padding:48px 24px 8px}
+.hero h1{font-size:32px;margin:0 0 12px}
+.hero p{font-size:17px;color:#4a6a82;max-width:600px;margin:0 auto}
+.steps{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;max-width:860px;margin:32px auto;padding:0 24px}
+.step{background:#fff;border:1px solid #d3e2ed;border-radius:14px;padding:20px;flex:1;min-width:220px;text-align:center}
+.step .num{background:#0b3d62;color:#fff;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:8px}
+.step h3{margin:8px 0 4px;font-size:16px}
+.step p{font-size:14px;color:#4a6a82;margin:0}
+.form-section{max-width:640px;margin:32px auto;padding:0 24px 60px}
+.card{background:#fff;border:1px solid #d3e2ed;border-radius:14px;padding:28px}
+.card h2{margin-top:0}
+label{font-weight:700;font-size:14px;display:block}
+input,textarea,select{width:100%;border:1px solid #ccdae7;border-radius:8px;padding:12px;margin:4px 0 16px;box-sizing:border-box;font:inherit}
+textarea{resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+.hint{font-size:13px;color:#7a94a8;font-weight:400;margin-top:-12px;margin-bottom:16px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 16px}
+@media(max-width:560px){.checks{grid-template-columns:1fr}}
+.checks label{font-weight:400;font-size:15px;display:flex;align-items:center;gap:8px;background:#f0f6fb;border:1px solid #d3e2ed;border-radius:8px;padding:10px 12px;cursor:pointer}
+.checks input{width:auto;margin:0}
+.checkrow{display:flex;align-items:center;gap:8px;margin:4px 0 16px;font-weight:400;font-size:15px}
+.checkrow input{width:auto;margin:0}
+.plans{display:grid;gap:10px;margin:4px 0 20px}
+.plan{display:flex;align-items:flex-start;gap:12px;background:#f0f6fb;border:2px solid #d3e2ed;border-radius:10px;padding:14px 16px;cursor:pointer;font-weight:400;font-size:15px}
+.plan input{width:auto;margin:4px 0 0;flex-shrink:0}
+.plan.selected{border-color:#0b3d62;background:#e7f1f8}
+.plan strong{font-size:16px}
+.plandesc{font-size:13px;color:#7a94a8}
+button,.btn{cursor:pointer;border:0;border-radius:10px;padding:14px 28px;font-weight:700;font-size:16px;text-decoration:none;display:inline-block;background:#0b3d62;color:#fff;width:100%;box-sizing:border-box;text-align:center}
+button:hover{background:#0e4d7c}
+button:disabled{opacity:.6;cursor:wait}
+.err{background:#fdecea;border-left:4px solid #c0392b;border-radius:8px;padding:14px 18px;margin-bottom:20px;color:#7a1f1f;font-size:15px;display:none}
+.okcard{background:#e8f5e9;border:1px solid #2a9d5a;border-radius:14px;padding:36px;text-align:center;display:none}
+.okcard .big{font-size:52px}
+.okcard h2{color:#1b5e20}
+footer{text-align:center;padding:32px;color:#7a94a8;font-size:14px}
+.fallback{background:#fff8e1;border-left:4px solid #e8a317;border-radius:8px;padding:16px 20px;margin-top:20px;font-size:14px;color:#5a3d00;display:none}
+</style>
+<!-- Microsoft Clarity (free analytics) — STAGED Oct 22, 2026. Project ID placeholder: Rob creates the free Clarity project, Oracle swaps the ID, then this ships on Rob's deploy word. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+</head>
+<body>
+<header>
+  <a href="/">🤟 DeafWork</a>
+  <a href="/employers.html">← Employers</a>
+</header>
+
+<div class="hero">
+  <h1>Post a Job</h1>
+  <p>Reach Deaf, hard-of-hearing, and DeafBlind talent. <strong>First listing free for 30 days</strong> — then $49 standard or $99 featured.</p>
+</div>
+
+<div class="steps">
+  <div class="step"><div class="num">1</div><h3>Fill out the form</h3><p>Tell us about the role — takes about 3 minutes.</p></div>
+  <div class="step"><div class="num">2</div><h3>We review it</h3><p>Every listing is checked for quality within 24 hours.</p></div>
+  <div class="step"><div class="num">3</div><h3>Your job goes live</h3><p>Deaf job seekers see it and apply directly to you.</p></div>
+</div>
+
+<div class="form-section">
+  <div class="card" id="formCard">
+    <h2>Job Details</h2>
+    <div class="err" id="errBox"></div>
+    <form id="jobForm" novalidate>
+      <div class="row">
+        <label>Company Name *
+          <input id="f_company" required placeholder="Acme Corp" autocomplete="organization"/>
+        </label>
+        <label>Your Work Email *
+          <input id="f_email" type="email" required placeholder="you@company.com" autocomplete="email"/>
+          <span class="hint">We'll contact you here once your listing is live.</span>
+        </label>
+      </div>
+      <label class="checkrow"><input type="checkbox" id="f_nonprofit"/> <strong>We're a nonprofit organization</strong></label>
+      <div class="hint" style="margin-top:-16px">Nonprofits post free — no payment required, ever.</div>
+      <label>Job Title *
+        <input id="f_title" required placeholder="e.g., Customer Support Rep, ASL Interpreter"/>
+      </label>
+      <div class="row">
+        <label>Location
+          <input id="f_location" placeholder="e.g., Portland, OR"/>
+        </label>
+        <label>Job Type *
+          <select id="f_jobtype">
+            <option>Full-time</option>
+            <option>Part-time</option>
+            <option>Contract</option>
+          </select>
+        </label>
+      </div>
+      <label class="checkrow"><input type="checkbox" id="f_remote"/> This is a remote position</label>
+      <label>Pay Range * <span class="hint" style="display:inline">Required — pay transparency is the law in 16 states + DC and for most remote roles.</span></label>
+      <div class="row">
+        <input id="f_paymin" type="number" min="0" step="0.01" required placeholder="Min — e.g., 25"/>
+        <input id="f_paymax" type="number" min="0" step="0.01" required placeholder="Max — e.g., 30"/>
+      </div>
+      <label>Pay Type *
+        <select id="f_paytype">
+          <option value="hourly">Per hour</option>
+          <option value="salary">Per year (salary)</option>
+        </select>
+      </label>
+      <label>Job Description *
+        <textarea id="f_desc" rows="6" required placeholder="What will this person do? What qualifications do you need? What makes your workplace Deaf-friendly?"></textarea>
+      </label>
+      <label>How Should Candidates Apply? *
+        <input id="f_apply" required placeholder="Application URL or email address"/>
+        <span class="hint">A direct link to the posting on your site works best. No phone-only applications, please.</span>
+      </label>
+      <label>ASL &amp; Accessibility — what do you offer? <span class="hint" style="display:inline">(check all that apply)</span></label>
+      <div class="checks">
+        <label><input type="checkbox" id="a_asl"/> 🤟 ASL-fluent workplace</label>
+        <label><input type="checkbox" id="a_interp"/> 🧑‍🤝‍🧑 Interpreters provided</label>
+        <label><input type="checkbox" id="a_text"/> 💬 Text-first communication</label>
+        <label><input type="checkbox" id="a_nophone"/> 📵 No phone required</label>
+        <label><input type="checkbox" id="a_db" style="grid-column:1/-1"/> 🦮 DeafBlind accessible</label>
+      </div>
+      <div id="planSection">
+      <label>Choose Your Plan *</label>
+      <div class="plans">
+        <label class="plan selected"><input type="radio" name="plan" value="free" checked/>
+          <div><strong>First listing — FREE for 30 days</strong><br/><span class="plandesc">Your listing goes live after review, free for 30 days.</span></div>
+        </label>
+        <label class="plan"><input type="radio" name="plan" value="standard"/>
+          <div><strong>Standard — $49</strong><br/><span class="plandesc">30-day listing, shown to all job seekers.</span></div>
+        </label>
+        <label class="plan"><input type="radio" name="plan" value="featured"/>
+          <div><strong>Featured — $99</strong><br/><span class="plandesc">Top placement on the jobs page for 30 days.</span></div>
+        </label>
+      </div>
+      </div>
+      <button type="submit" id="submitBtn">Submit Job for Review →</button>
+    </form>
+    <div class="fallback" id="fallbackBox">
+      <strong>Couldn't submit automatically?</strong> No problem — email your job details to
+      <strong>DeafWork2026@gmail.com</strong> and we'll get it posted for you.
+      <div style="margin-top:12px"><a class="btn" id="mailtoBtn" href="#">📧 Open Email With My Details</a></div>
+    </div>
+    <p style="font-size:13px;color:#7a94a8;text-align:center;margin-top:16px">By submitting, you agree to our <a href="employer-guidelines.html" style="color:#0b3d62;font-weight:700">Employer Posting Guidelines</a>. Prefer email? Send details to <strong>DeafWork2026@gmail.com</strong></p>
+  </div>
+
+  <div class="okcard" id="okCard">
+    <div class="big">✅</div>
+    <h2 id="okHeading">Thanks! We'll review your listing and it'll be live within 24 hours.</h2>
+    <p style="color:#4a6a82">We'll email you at the address you provided once it's published.</p>
+    <!-- Payment step: paid plans open a Stripe checkout link in a new tab.
+         NOTE: Payment verification is MANUAL for now — Rob matches the Stripe
+         payment email to the submission email before publishing. Listings stay
+         status='pending' until approved manually; nothing auto-publishes on payment. -->
+    <div id="payBlock" style="display:none;margin-top:24px;background:#fff;border:1px solid #d3e2ed;border-radius:10px;padding:20px">
+      <h3 style="margin-top:0">Almost done! Complete your payment to activate your listing.</h3>
+      <p style="color:#4a6a82;font-size:14px">Your listing is submitted and pending review. Once your payment is complete, we'll activate it after review.</p>
+      <a class="btn" id="payBtn" href="#" target="_blank" rel="noopener" style="width:auto;padding:14px 36px">Pay Now →</a>
+    </div>
+    <p style="margin-top:24px"><a href="/employers.html" style="color:#0b3d62;font-weight:700">← Back to Employers</a></p>
+  </div>
+</div>
+
+<footer>
+  <p>🤟 DeafWork — Jobs for the Deaf community, by the Deaf community.</p>
+
+  <p style="margin-top: 10px; font-size: 0.9em;"><a href="https://www.instagram.com/DeafWork2026" target="_blank" rel="noopener">📸 Instagram</a> · <a href="https://www.facebook.com/share/1Ek4zL2iFy/" target="_blank" rel="noopener">📘 Facebook</a> · <a href="deafwork-privacy.html">Privacy</a> · <a href="deafwork-terms.html">Terms</a> · <a href="deafpulse.html">🤟 Deaf Pulse</a> · <a href="about.html">About</a> · <a href="about.html#support">Support</a></p>
+</footer>
+
+<script>
+const supa = supabase.createClient(
+  "https://vdxncfcgtguzmsncjovl.supabase.co",
+  "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap"
+);
+const $ = id => document.getElementById(id);
+
+// Nonprofit toggle: nonprofits post free — hide plan selector, skip payment
+$("f_nonprofit").addEventListener("change", () => {
+  $("planSection").style.display = $("f_nonprofit").checked ? "none" : "block";
+});
+
+// Plan radio visual toggle
+document.querySelectorAll('input[name="plan"]').forEach(r => {
+  r.addEventListener("change", () => {
+    document.querySelectorAll(".plan").forEach(l => l.classList.remove("selected"));
+    r.closest(".plan").classList.add("selected");
+  });
+});
+
+// Client-side mirror of the compliance checker's hardest rules: block
+// discriminatory / inaccessible phrases before anything is submitted.
+const BLOCKED = [
+  [/\bmust be hearing\b/i, "Listings may not require hearing — that likely violates the ADA."],
+  [/\bhearing required\b/i, "Listings may not require hearing — that likely violates the ADA."],
+  [/\bmust be able to hear\b/i, "Listings may not require hearing — that likely violates the ADA."],
+  [/\bexcellent phone skills\b/i, "Phone-based requirements exclude Deaf applicants. Please offer a text or video alternative."],
+  [/\bphone interview required\b/i, "Phone interviews exclude Deaf applicants. Please offer a text or video alternative."],
+  [/\bmust have a driver's license\b/i, "Driver's license requirements are only allowed when driving is an essential job duty."],
+  [/\bno (deaf|disabled|handicapped)\b/i, "Listings may not exclude Deaf or disabled applicants."],
+];
+
+function showErr(msg) {
+  const b = $("errBox");
+  b.innerHTML = msg;
+  b.style.display = "block";
+  b.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function hideErr() { $("errBox").style.display = "none"; }
+
+function buildMailto(d) {
+  const lines = [
+    "Company: " + d.company,
+    "Contact email: " + d.email,
+    "Nonprofit: " + (d.nonprofit ? "yes" : "no"),
+    "Job title: " + d.title,
+    "Location: " + d.location + (d.remote ? " (Remote)" : ""),
+    "Job type: " + d.jobtype,
+    "Pay: $" + d.paymin + "–$" + d.paymax + (d.paytype === "salary" ? "/yr" : "/hr"),
+    "Plan: " + d.plan,
+    "",
+    "Description:",
+    d.desc,
+    "",
+    "Apply: " + d.apply,
+    "Accessibility: " + (d.accText || "none specified"),
+  ];
+  return "mailto:DeafWork2026@gmail.com?subject=" +
+    encodeURIComponent("New job listing: " + d.title + " at " + d.company) +
+    "&body=" + encodeURIComponent(lines.join("\n"));
+}
+
+$("jobForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  hideErr();
+
+  const d = {
+    company: $("f_company").value.trim(),
+    email: $("f_email").value.trim(),
+    title: $("f_title").value.trim(),
+    location: $("f_location").value.trim(),
+    remote: $("f_remote").checked,
+    jobtype: $("f_jobtype").value,
+    paymin: $("f_paymin").value.trim(),
+    paymax: $("f_paymax").value.trim(),
+    paytype: $("f_paytype").value,
+    desc: $("f_desc").value.trim(),
+    apply: $("f_apply").value.trim(),
+    nonprofit: $("f_nonprofit").checked,
+    plan: $("f_nonprofit").checked ? "free" : ((document.querySelector('input[name="plan"]:checked') || {}).value || "free"),
+  };
+
+  // --- Required-field validation (mirrors compliance checker: no incomplete listings) ---
+  const missing = [];
+  if (!d.company) missing.push("Company name");
+  if (!d.email) missing.push("Work email");
+  else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) { showErr("Please enter a valid work email address."); return; }
+  if (!d.title) missing.push("Job title");
+  if (!d.remote && !d.location) missing.push("Location (or check Remote)");
+  if (!d.paymin || !d.paymax) missing.push("Pay range (min and max)");
+  else if (Number(d.paymax) < Number(d.paymin)) { showErr("Pay max must be equal to or higher than pay min."); return; }
+  if (!d.desc) missing.push("Job description");
+  if (!d.apply) missing.push("Application URL or email");
+  if (missing.length) { showErr("Please complete the required fields: <strong>" + missing.join(", ") + "</strong>."); return; }
+
+  // --- Discriminatory-phrase pre-check ---
+  const hay = (d.title + " " + d.desc).toLowerCase();
+  for (const [re, msg] of BLOCKED) {
+    if (re.test(hay)) { showErr("<strong>Please revise your listing:</strong> " + msg); return; }
+  }
+
+  // --- Build accommodations text + boolean flags (same schema as admin.html) ---
+  const accBits = [];
+  if ($("a_interp").checked) accBits.push("Interpreters provided");
+  if ($("a_db").checked) accBits.push("DeafBlind accessible");
+  d.accText = accBits.join("; ");
+  const accommodations = ["Contact: " + d.email, d.nonprofit ? "Nonprofit: yes" : null, d.accText ? "Accessibility: " + d.accText : null, "Plan: " + (d.nonprofit ? "free (nonprofit)" : d.plan)]
+    .filter(Boolean).join("\n");
+  const description = "Employment type: " + d.jobtype + "\n\n" + d.desc;
+
+  const btn = $("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+
+  try {
+    // Same pattern as admin.html getOrCreateEmployer
+    let employer_id;
+    const { data: existing } = await supa.from("employers").select("id").eq("company_name", d.company).maybeSingle();
+    if (existing) {
+      employer_id = existing.id;
+    } else {
+      const { data: ins, error: eErr } = await supa.from("employers").insert({ company_name: d.company }).select("id").single();
+      if (eErr) throw eErr;
+      employer_id = ins.id;
+    }
+
+    const job = {
+      title: d.title,
+      employer_id,
+      location: d.remote ? (d.location || "Remote") : d.location,
+      application_url: d.apply,
+      pay_min: Number(d.paymin),
+      pay_max: Number(d.paymax),
+      description,
+      accommodations,
+      // New employer submissions are held for Rob's review — never auto-published
+      status: "pending",
+      remote: d.remote,
+      asl_support: $("a_asl").checked,
+      text_first: $("a_text").checked,
+      no_phone_application: $("a_nophone").checked,
+    };
+    const { error: jErr } = await supa.from("jobs").insert(job);
+    if (jErr) throw jErr;
+
+    // --- Plan-based payment step ---
+    // NOTE: payment verification is MANUAL — Rob matches the Stripe payment
+    // email to the submission email before publishing. Nothing auto-publishes.
+    const planLinks = {
+      standard: "https://buy.stripe.com/4gM7sM0020An37531c48003",
+      featured: "https://buy.stripe.com/7sY3cw1460An7nl9pA48004",
+    };
+    if (d.plan === "standard" || d.plan === "featured") {
+      const amt = d.plan === "standard" ? "49" : "99";
+      $("okHeading").textContent = "Thanks! Your listing is submitted and pending review.";
+      $("payBtn").href = planLinks[d.plan];
+      $("payBtn").textContent = "Pay $" + amt + " Now →";
+      $("payBlock").style.display = "block";
+    }
+
+    $("formCard").style.display = "none";
+    $("okCard").style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (err) {
+    // If direct insert is blocked (e.g., RLS), fall back to email with everything pre-filled
+    $("mailtoBtn").href = buildMailto(d);
+    $("fallbackBox").style.display = "block";
+    showErr("We couldn't submit automatically just now (" + (err.message || "connection issue") + "). " +
+      "Please use the <strong>📧 Open Email With My Details</strong> button below — your form is already filled in.");
+    btn.disabled = false;
+    btn.textContent = "Submit Job for Review →";
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Import Employers — DeafWork Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#f0f7ff;color:#1a2b3c;min-height:100vh;padding:24px}
+main{max-width:600px;margin:0 auto}
+h1{font-size:24px;color:#0b3d6e;margin-bottom:8px}
+p{font-size:14px;color:#5a7a96;margin-bottom:20px;line-height:1.6}
+.btn{background:#0b6bcb;border:0;border-radius:12px;padding:16px 24px;color:#fff;font-weight:700;font-size:16px;cursor:pointer;width:100%;margin-bottom:12px}
+.btn:disabled{opacity:.5}
+.btn-sec{background:#fff;border:2px solid #0b6bcb;color:#0b6bcb}
+#log{background:#fff;border:1px solid #d0dce8;border-radius:12px;padding:16px;font-size:13px;max-height:400px;overflow-y:auto;line-height:1.8}
+.ok{color:#0a8a3c}.err{color:#c00}.info{color:#5a7a96}
+.count{font-size:48px;font-weight:900;color:#0b6bcb;text-align:center;margin:16px 0}
+</style>
+<!-- Microsoft Clarity (free analytics) — STAGED Oct 22, 2026. Project ID placeholder: Rob creates the free Clarity project, Oracle swaps the ID, then this ships on Rob's deploy word. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+</head>
+<body>
+<main>
+<h1>📥 Import 19 Employers</h1>
+<p>This adds 19 verified Deaf-friendly employers from across the USA to DeafWork. You must be logged in as admin. Tap the button once — it skips any already in the database.</p>
+<div class="count" id="count">19</div>
+<button class="btn" id="import-btn">Import All Employers</button>
+<button class="btn btn-sec" onclick="location.href='admin.html'">← Back to Admin</button>
+<div id="log" style="margin-top:16px"></div>
+</main>
+<script>
+const SB_URL='https://vdxncfcgtguzmsncjovl.supabase.co';
+const SB_KEY='sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const log=document.getElementById('log');
+function add(msg,cls){log.innerHTML+='<div class="'+(cls||'info')+'">'+msg+'</div>';log.scrollTop=log.scrollHeight}
+
+const EMPLOYERS=[
+{name:"Texas School for the Deaf",desc:"Texas public residential school for deaf students, hiring teachers, residential staff, and specialists.",web:"https://www.tsd.texas.gov/apps/pages/HR",loc:"Austin, TX"},
+{name:"California School for the Deaf, Fremont",desc:"State-run ASL-immersive K-12 school hiring instructional and support staff.",web:"https://www.csdeagles.com/apps/pages/studentlifejobs",loc:"Fremont, CA"},
+{name:"Florida School for the Deaf and the Blind",desc:"Public boarding school serving deaf, hard-of-hearing, and blind students.",web:"https://fsdbk12.org/page/careers",loc:"St. Augustine, FL"},
+{name:"Illinois School for the Deaf",desc:"State-operated school hiring educators and residential staff.",web:"https://www.isd.illinois.gov/careers",loc:"Jacksonville, IL"},
+{name:"Maryland School for the Deaf",desc:"State-funded ASL-immersive school with campuses in Frederick and Columbia.",web:"https://msd.edu",loc:"Frederick, MD"},
+{name:"Arizona State Schools for the Deaf and the Blind",desc:"State agency hiring statewide for deaf and blind education.",web:"https://asdb.az.gov/teamworks/",loc:"Tucson, AZ"},
+{name:"Tennessee Schools for the Deaf",desc:"State school system hiring teachers, interpreters, and residential staff.",web:"https://www.tsdeaf.org/apps/jobs/",loc:"Knoxville, TN"},
+{name:"Kentucky School for the Deaf",desc:"State-run school for deaf students in Danville, Kentucky.",web:"https://ksd.kyschools.us",loc:"Danville, KY"},
+{name:"New York School for the Deaf (Fanwood)",desc:"Private nonprofit ASL school hiring educators and support staff.",web:"https://nysd.net",loc:"White Plains, NY"},
+{name:"American School for the Deaf",desc:"America's oldest school for the deaf, hiring teachers, clinicians, and staff.",web:"https://www.asd-1817.org",loc:"West Hartford, CT"},
+{name:"The Learning Center for the Deaf",desc:"Nonprofit deaf school hiring educators and support professionals.",web:"https://www.tlcdeaf.org",loc:"Framingham, MA"},
+{name:"Pennsylvania School for the Deaf",desc:"Private deaf school in Philadelphia hiring educators and staff.",web:"https://www.psd.org",loc:"Philadelphia, PA"},
+{name:"Gallaudet University",desc:"The world's only university designed for deaf and hard-of-hearing students. Major bilingual ASL employer.",web:"https://www.gallaudet.edu/careers",loc:"Washington, DC"},
+{name:"RIT / National Technical Institute for the Deaf",desc:"World's largest technological college for deaf students, hiring through RIT.",web:"https://jobs.rit.edu",loc:"Rochester, NY"},
+{name:"Helen Keller National Center",desc:"National leader in DeafBlind services, hiring rehab, training, and support staff.",web:"https://www.helenkeller.org/careers/",loc:"Sands Point, NY"},
+{name:"Mozzeria",desc:"Deaf-owned wood-fired Neapolitan pizzeria staffed entirely by deaf and hard-of-hearing employees.",web:"https://www.mozzeria.com",loc:"San Francisco, CA"},
+{name:"Donny's Dogs",desc:"Deaf-run hot dog stand and workforce training program by the WA Association of the Deaf.",web:"https://www.wadhh.org/",loc:"Vancouver, WA"},
+{name:"Woodstock Cafe",desc:"Portland's Deaf-operated coffee shop run by CymaSpace. ASL is the primary language.",web:"https://www.instagram.com/woodstockcafepdx/",loc:"Portland, OR"},
+{name:"Puget Sound Regional Services",desc:"WA's largest supported-living provider for Deaf, Blind, and DeafBlind adults with developmental disabilities. Deaf-friendly culture with 25+ Deaf/HoH staff, video phones on site, interpreters provided.",web:"https://www.gopsrs.org/careers",loc:"Renton, WA"},
+{name:"Kramer Wealth Managers",desc:"All-Deaf financial planning firm since 1985. Five Deaf advisors serving Deaf clients nationwide; everyone fluent in ASL.",web:"https://kramerwealth.com",loc:"Frederick, MD"},
+{name:"Passages Deaf Travel",desc:"BBB-accredited full-service travel agency for the Deaf community since 2003. Deaf group cruises, tours, all-inclusive vacations.",web:"https://passagesdeaftravel.com",loc:"Williamsburg, VA"},
+{name:"Apple",desc:"Hires Deaf employees across US stores in sales, repairs, coding, and tech roles. AppleCare hires Deaf for in-store customer support and device diagnostics. All stores have access to SignTime, Apple\u0027s internal interpreting platform.",web:"https://www.apple.com/careers/us/work-at-apple/teams/support-and-service.html",loc:"Nationwide, US"},
+];
+const JOBS=[
+{title:"Entry Level House Supervisor",company:"Puget Sound Regional Services",loc:"Renton, WA",url:"https://www.gopsrs.org/careers",paymin:23.75,paymax:27.75,desc:"Entry-level house supervisor supporting adults with intellectual and developmental disabilities in a supported-living home. Full-time in Renton, WA.",accom:"Deaf-friendly culture: many staff are Deaf or hard of hearing, video phones at office and sites, interpreters for trainings and meetings, ASL learning support. Apply by email: employment@gopsrs.org.",remote:false,asl:true,text:true,nophone:false},
+];
+
+document.getElementById('import-btn').onclick=async()=>{
+  const btn=document.getElementById('import-btn');
+  btn.disabled=true;btn.textContent='Importing…';
+  log.innerHTML='';
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session){add('❌ Not logged in. Go to admin.html and log in first.','err');btn.disabled=false;btn.textContent='Import All Employers';return}
+    add('✅ Logged in as '+session.user.email);
+    let added=0,skipped=0;
+    for(const e of EMPLOYERS){
+      const {data:existing}=await sb.from('employers').select('id').eq('company_name',e.name).limit(1);
+      if(existing&&existing.length){add('⏭️ Skipped (already exists): '+e.name);skipped++;continue}
+      const {error}=await sb.from('employers').insert({
+        company_name:e.name,description:e.desc,website:e.web,location:e.loc,
+        verified:true,asl_support:true,no_phone_communication:false
+      });
+      if(error){add('❌ Failed: '+e.name+' — '+error.message,'err')}
+      else{add('✅ Added: '+e.name,'ok');added++}
+    }
+    let jAdded=0,jSkipped=0;
+    for(const j of JOBS){
+      const {data:emp}=await sb.from('employers').select('id').eq('company_name',j.company).limit(1);
+      if(!emp||!emp.length){add('⏭️ Skipped job (employer missing): '+j.title,'err');jSkipped++;continue}
+      const {data:je}=await sb.from('jobs').select('id').eq('title',j.title).eq('employer_id',emp[0].id).limit(1);
+      if(je&&je.length){add('⏭️ Skipped job (already exists): '+j.title);jSkipped++;continue}
+      const exp=new Date();exp.setDate(exp.getDate()+30);
+      const {error:jerr}=await sb.from('jobs').insert({title:j.title,employer_id:emp[0].id,location:j.loc,application_url:j.url,pay_min:j.paymin,pay_max:j.paymax,description:j.desc,accommodations:j.accom,status:'open',remote:j.remote,asl_support:j.asl,text_first:j.text,no_phone_application:j.nophone,expires_at:exp.toISOString()});
+      if(jerr){add('❌ Failed job: '+j.title+' — '+jerr.message,'err')}
+      else{add('✅ Added job: '+j.title+' @ '+j.company,'ok');jAdded++}
+    }
+    add('<br/><strong>Done! Employers: '+added+' added, '+skipped+' skipped. Jobs: '+jAdded+' added, '+jSkipped+' skipped.</strong>','ok');
+    document.getElementById('count').textContent=added+' ✓';
+  }catch(err){add('❌ Error: '+err.message,'err')}
+  btn.disabled=false;btn.textContent='Import All Employers';
+};
+</script>
+</body>
+</html>

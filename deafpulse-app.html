@@ -1,0 +1,1473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="The Deaf Pulse — the sign-first social platform for Deaf communities worldwide."/>
+<title>The Deaf Pulse</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+--bg:#101c38;--card:#1e2547;--border:#39406b;--txt:#ffffff;--muted:#a7b3c9;
+--p1:#e8edf2;--p2:#b9c2cc;--p3:#8a939e;--p4:#6e777f;--acc:#c9d1d9}
+body{background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:28px}
+header{position:sticky;top:0;z-index:10;background:rgba(13,10,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:22px;font-weight:900;background:linear-gradient(90deg,var(--p1),var(--p3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav.tabs{position:sticky;top:0;z-index:10;background:rgba(18,28,58,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0}
+nav.tabs button{background:none;border:0;color:var(--muted);font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 7px}
+nav.tabs button span{font-size:22px}
+nav.tabs button.active{color:var(--p2)}
+main{max-width:600px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.active{display:block}
+/* Feed */
+.post{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden}
+.post video{width:100%;max-height:70vh;background:#000;display:block}
+.post-body{padding:14px 16px}
+.post-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--p1),var(--acc));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.uname{font-weight:700;font-size:14px}.utime{font-size:12px;color:var(--muted)}
+.caption{font-size:14px;line-height:1.5;margin-bottom:10px}
+video::cue{font-size:1.15rem;line-height:1.4;color:#fff;background:rgba(0,0,0,.85);text-shadow:0 1px 2px #000}
+.actions{display:flex;gap:18px;padding-top:4px}
+.actions button{background:none;border:0;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.actions button.liked{color:var(--acc)}
+.post img.post-img{width:100%;max-height:70vh;object-fit:cover;background:#000;display:block}
+.follow-btn{background:#2a3358!important;border:1px solid var(--border)!important;border-radius:16px;padding:4px 12px!important;color:#fff!important;font-size:12px!important;font-weight:700;cursor:pointer}
+.follow-btn.on{background:#1a3a8a!important;color:#ffd166!important}
+.react-picker{display:none;gap:6px;padding:8px 0 2px;flex-wrap:wrap}
+.react-picker.open{display:flex}
+.react-picker button{background:#101c38;border:1px solid var(--border);border-radius:20px;font-size:19px;padding:5px 10px;cursor:pointer}
+.react-picker button.mine{border-color:#ffd166;background:#2a3358}
+.react-sum{font-size:13px;color:var(--muted);margin-bottom:6px}
+#notif-bell{position:relative;background:none;border:0;font-size:21px;cursor:pointer;margin-left:12px;padding:2px}
+#notif-badge{position:absolute;top:-4px;right:-8px;background:#e63946;color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:1px 5px;display:none}
+.type-toggle{display:flex;gap:8px;margin-bottom:14px}
+.type-toggle button{flex:1;background:#101c38;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:10px 6px;font-size:14px;font-weight:700;cursor:pointer}
+.type-toggle button.on{background:#1a3a8a;color:#fff;border-color:#ffd166}
+/* News */
+.news-card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:14px;overflow:hidden;display:flex;gap:0;cursor:pointer;text-decoration:none;color:inherit}
+.news-card img{width:110px;min-height:110px;object-fit:cover;background:#1a1a1e}
+.news-body{padding:12px 14px;flex:1}
+.news-country{font-size:11px;font-weight:700;color:var(--p3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.news-title{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.news-summary{font-size:13px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Auth / forms */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px}
+.card h2{font-size:20px;margin-bottom:16px}
+input,textarea{width:100%;background:#101012;border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
+input:focus,textarea:focus{border-color:var(--p1)}
+.btn{background:linear-gradient(180deg,#f2f5f7,#b9c2cc);border:0;border-radius:12px;padding:13px 24px;color:#050507;font-weight:700;font-size:16px;cursor:pointer;width:100%}
+.btn:disabled{opacity:.5}
+.btn-sec{background:var(--card);border:1px solid var(--border);margin-top:8px}
+.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px}
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--p3));border:0;color:#050507;font-size:28px;cursor:pointer;box-shadow:0 4px 20px rgba(232,237,242,.35);z-index:9}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:flex-end;justify-content:center}
+.modal.open{display:flex}
+.sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:600px;padding:24px;max-height:85vh;overflow-y:auto}
+.sheet h2{margin-bottom:16px}
+@media(min-width:640px){.modal{align-items:center}.sheet{border-radius:20px}}
+.hidden{display:none!important}
+#dw-toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);width:min(92vw,560px);background:#ffd166;color:#14100a;font-size:15px;font-weight:600;line-height:1.45;padding:12px 16px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.45);z-index:999;display:none;text-align:center;cursor:pointer}
+</style>
+<!-- Microsoft Clarity (free analytics) — STAGED Oct 22, 2026. Project ID placeholder: Rob creates the free Clarity project, Oracle swaps the ID, then this ships on Rob's deploy word. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+</head>
+<body>
+<header>
+<div class="logo">💜 The Deaf Pulse</div><a href="index.html" style="color:#7cc4ff;font-weight:700;text-decoration:none;font-size:15px;margin-left:14px">💼 Jobs</a><button onclick="openLive()" style="background:none;border:0;color:#ffd166;font-weight:700;font-size:15px;margin-left:14px;cursor:pointer">🎥 Live</button>
+<button id="notif-bell" title="Notifications" onclick="openNotifications()">🔔<span id="notif-badge"></span></button><div id="hdr-auth"></div>
+</header>
+<nav class="tabs">
+<button data-tab="feed" class="active"><span>🏠</span>Feed</button>
+<button data-tab="news"><span>📰</span>News</button>
+<button data-tab="groups"><span>👥</span>Groups</button><button data-tab="events"><span>📅</span>Events</button>
+<button data-tab="messages"><span>💬</span>Chat</button>
+<button data-tab="profile"><span>👤</span>Profile</button>
+</nav>
+
+<main>
+<!-- FEED -->
+<section id="tab-feed" class="tab active">
+<div id="pulse-hangout" style="margin-bottom:18px;background:linear-gradient(135deg,#1a3a8a,#101c38);border:1px solid #39406b;border-radius:14px;padding:16px"><h2 style="font-size:18px;margin:0 0 6px">🎥 Live Hangout</h2><p style="color:var(--muted);font-size:14px;margin:0 0 12px;line-height:1.5">The community room is always open — face to face, sign to sign. Right here inside Pulse — no other app. Sound starts off, cameras on.</p><button onclick="openLive()" style="background:#ffd166;color:#050507;font-weight:800;border:0;border-radius:12px;padding:12px 22px;font-size:15px;cursor:pointer">Join Live Hangout →</button></div>
+<div id="pulse-sign-day" style="margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-left:4px solid #ffd166;border-radius:14px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px"><h2 style="font-size:18px;margin:0">🤟 ASL Sign of the Day</h2><span id="sotd-date" style="color:var(--muted);font-size:13px"></span></div><div id="sotd-word" style="font-size:30px;font-weight:900;color:#ffd166;letter-spacing:.02em;margin:4px 0 8px"></div><p id="sotd-desc" style="font-size:14px;margin:0 0 8px;line-height:1.6"></p><p id="sotd-tip" style="color:var(--muted);font-size:13px;margin:0 0 10px;line-height:1.5"></p><p style="color:var(--muted);font-size:12px;margin:0">Signs verified against Lifeprint (Dr. Bill Vicars)</p></div>
+<div id="pulse-jobs" style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="font-size:18px;margin:0">💼 Latest Jobs from DeafWork</h2><a href="index.html" style="color:#7cc4ff;font-size:14px;text-decoration:none">See all jobs →</a></div><div id="pulse-jobs-list"><p style="color:var(--muted);font-size:14px">Loading jobs…</p></div></div>
+<div id="feed"></div>
+</section>
+
+<!-- NEWS -->
+<section id="tab-news" class="tab">
+<div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto" id="news-filters"></div>
+<div id="news"></div>
+</section>
+
+<!-- GROUPS -->
+<section id="tab-groups" class="tab">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h2 style="font-size:20px">👥 Groups</h2>
+<button class="btn" id="new-group-btn" style="width:auto;padding:8px 18px;font-size:14px">＋ New group</button>
+</div>
+<div id="group-list"></div>
+<div id="group-view" class="hidden">
+<button class="btn btn-sec" id="group-back" style="margin-bottom:12px">← All groups</button>
+<div id="group-detail"></div>
+</div>
+</section>
+
+<!-- PROFILE -->
+<section id="tab-profile" class="tab">
+<div id="profile"></div>
+</section>
+
+<!-- MESSAGES -->
+<section id="tab-events" class="tab">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h2 style="font-size:20px">📅 Deaf Events</h2>
+<button id="ev-add-btn" class="btn" style="width:auto;padding:9px 16px">＋ Add event</button>
+</div>
+<div id="ev-form" class="card" style="display:none;padding:16px;margin-bottom:16px">
+<input id="ev-title" placeholder="Event name *" style="width:100%;margin-bottom:10px">
+<input id="ev-date" type="date" style="width:100%;margin-bottom:10px">
+<input id="ev-time" placeholder="Time (e.g. 6:00 PM – 9:00 PM)" style="width:100%;margin-bottom:10px">
+<input id="ev-location" placeholder="Place / venue" style="width:100%;margin-bottom:10px">
+<div style="display:flex;gap:10px"><input id="ev-city" placeholder="City" style="flex:1"><input id="ev-state" placeholder="State" style="width:90px"></div>
+<input id="ev-url" placeholder="Event link (optional)" style="width:100%;margin:10px 0">
+<textarea id="ev-desc" placeholder="What's happening?" rows="3" style="width:100%;margin-bottom:12px"></textarea>
+<div style="display:flex;gap:10px"><button id="ev-save" class="btn" style="flex:1">Save event</button><button id="ev-cancel" class="btn" style="flex:1;background:#2a3358;color:#fff">Cancel</button></div>
+</div>
+<div id="events"><div class="empty">Loading…</div></div>
+</section>
+<section id="tab-messages" class="tab">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h2 style="font-size:20px">💬 Chats</h2>
+<button class="btn" id="new-chat-btn" style="width:auto;padding:8px 18px;font-size:14px">＋ New chat</button>
+</div>
+<div id="convo-list"></div>
+<div id="chat-view" class="hidden">
+<button class="btn btn-sec" id="chat-back" style="margin-bottom:12px">← Back</button>
+<div id="chat-header" style="margin-bottom:12px"></div>
+<div id="chat-messages" style="margin-bottom:16px"></div>
+<div style="display:flex;gap:8px">
+<input type="text" id="chat-input" placeholder="Type a message…" style="margin-bottom:0"/>
+<button class="btn" id="chat-video-btn" style="width:auto;padding:12px 16px" title="Send video">📹</button>
+<button class="btn" id="chat-send" style="width:auto;padding:12px 20px">Send</button>
+</div>
+<input type="file" id="chat-video" accept="video/*" capture="user" class="hidden"/>
+</div>
+</section>
+</main>
+
+<button class="fab" id="fab" title="New post">＋</button>
+
+
+<div style="text-align:center;padding:16px;font-size:12px;color:var(--muted)">
+<a href="deafpulse-terms.html" style="color:var(--muted);margin:0 8px">Terms</a>·<a href="deafpulse-privacy.html" style="color:var(--muted);margin:0 8px">Privacy</a><a href="deafpulse-guidelines.html" style="color:var(--muted);margin:0 8px">Guidelines</a><a href="index.html" style="color:var(--muted);margin:0 8px">💼 Jobs</a>
+</div>
+
+<!-- NEW POST MODAL -->
+<div class="modal" id="post-modal">
+<div class="sheet">
+<h2>New sign post 🤟</h2>
+<div class="type-toggle"><button data-ptype="video" class="on" onclick="setPostType('video')">🎥 Video</button><button data-ptype="photo" onclick="setPostType('photo')">📷 Photo</button><button data-ptype="text" onclick="setPostType('text')">✍️ Text</button></div>
+<input type="file" id="post-video" accept="video/*" capture="user"/>
+<video id="post-preview" class="hidden" controls style="width:100%;border-radius:12px;margin-bottom:12px"></video>
+<input type="file" id="post-photo" accept="image/*" style="display:none"/>
+<img id="post-photo-preview" style="display:none;width:100%;border-radius:12px;margin-bottom:12px" alt="Photo preview"/>
+<textarea id="post-caption" rows="3" placeholder="What's on your mind? (caption)"></textarea>
+<textarea id="post-words" rows="3" placeholder="Words in this video (optional) — type what you say and we'll show it as captions 🤟"></textarea>
+<button class="btn" id="post-submit">Share</button>
+<button class="btn btn-sec" id="post-cancel">Cancel</button>
+</div>
+</div>
+
+<!-- COMMENTS MODAL -->
+<div class="modal" id="comments-modal">
+<div class="sheet">
+<h2>💬 Comments</h2>
+<div id="comments-list" style="margin-bottom:14px"></div>
+<textarea id="comment-input" rows="2" placeholder="Write a comment…"></textarea>
+<div id="comment-video-name" style="font-size:12px;color:var(--muted);margin-bottom:8px"></div>
+<div style="display:flex;gap:10px">
+<button class="btn btn-sec" style="flex:1;margin-top:0" onclick="document.getElementById('comment-video').click()">📹 Video comment</button>
+<button class="btn" style="flex:1" id="comment-send">Send</button>
+</div>
+<input type="file" id="comment-video" accept="video/*" capture="user" class="hidden"/>
+<button class="btn btn-sec" onclick="closeComments()">Close</button>
+</div>
+</div>
+
+<!-- NOTIFICATIONS MODAL -->
+<div class="modal" id="notif-modal">
+<div class="sheet">
+<h2>🔔 Notifications</h2>
+<div id="notif-list"></div>
+<button class="btn btn-sec" onclick="closeNotifications()">Close</button>
+</div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal" id="auth-modal">
+<div class="sheet">
+<h2 id="auth-title">Join The Deaf Pulse</h2>
+<input type="email" id="auth-email" placeholder="Email"/>
+<input type="password" id="auth-pass" placeholder="Password"/>
+<input type="text" id="auth-username" placeholder="Username"/>
+<div id="auth-signup-extra">
+<label style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Date of birth (you must be 13 or older)</label>
+<input type="date" id="auth-dob" max="2013-10-11"/>
+</div>
+<button class="btn" id="auth-submit">Sign Up</button>
+<button class="btn btn-sec" id="auth-toggle">Have an account? Log in</button>
+<button class="btn btn-sec" id="auth-cancel">Cancel</button>
+</div>
+</div>
+
+<!-- NEW CHAT MODAL -->
+<div class="modal" id="chat-modal">
+<div class="sheet">
+<h2>New chat 🤟</h2>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn" id="mode-dm" style="flex:1">Direct message</button>
+<button class="btn btn-sec" id="mode-group" style="flex:1;margin-top:0">Group chat</button>
+</div>
+<div id="group-name-wrap" class="hidden">
+<input type="text" id="group-name" placeholder="Group name (e.g. Seattle Deaf Friends)" maxlength="60"/>
+</div>
+<input type="text" id="user-search" placeholder="Search people by username…" autocomplete="off"/>
+<div id="user-results" style="margin-bottom:12px"></div>
+<div id="selected-members" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
+<div id="member-count" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
+<button class="btn" id="chat-create">Create chat</button>
+<button class="btn btn-sec" id="chat-modal-cancel">Cancel</button>
+</div>
+</div>
+
+<!-- GROUP MEMBERS MODAL -->
+<div class="modal" id="members-modal">
+<div class="sheet">
+<h2 id="members-title">Members</h2>
+<div id="members-list"></div>
+<div id="members-add-wrap" class="hidden">
+<h3 style="margin:18px 0 8px;font-size:15px">Add members</h3>
+<input type="text" id="members-search" placeholder="Search by username…" autocomplete="off"/>
+<div id="members-search-results"></div>
+</div>
+<button class="btn btn-sec" id="members-close" style="margin-top:16px">Close</button>
+</div>
+</div>
+
+<!-- NEW GROUP PAGE MODAL -->
+<div class="modal" id="group-modal">
+<div class="sheet">
+<h2>New group 👥</h2>
+<input type="text" id="group-page-name" placeholder="Group name (e.g. Bay Area Deaf Hikers)" maxlength="60"/>
+<textarea id="group-page-desc" rows="3" placeholder="What is this group about?" maxlength="500"></textarea>
+<button class="btn" id="group-page-create">Create group</button>
+<button class="btn btn-sec" id="group-modal-cancel">Cancel</button>
+</div>
+</div>
+
+<!-- AGE VERIFICATION MODAL (for existing users without a DOB on file) -->
+<div class="modal" id="age-modal">
+<div class="sheet">
+<h2>Confirm your age</h2>
+<p style="color:var(--muted);font-size:14px;margin-bottom:16px">Deaf Pulse is for ages 13 and up. Please confirm your date of birth to continue.</p>
+<input type="date" id="age-dob" max="2026-10-11"/>
+<button class="btn" id="age-submit">Confirm</button>
+<button class="btn btn-sec" id="age-cancel">Cancel</button>
+</div>
+</div>
+
+<script>
+const SB_URL='https://vdxncfcgtguzmsncjovl.supabase.co';
+const SB_KEY='sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+let user=null, mode='signup';
+
+// ---------- tabs ----------
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='news') loadNews();
+  if(b.dataset.tab==='profile') loadProfile();
+  if(b.dataset.tab==='messages') loadConversations();
+  if(b.dataset.tab==='groups') loadGroups();
+  if(b.dataset.tab==='events') loadEvents();
+}));
+
+// ---------- ASL Sign of the Day ----------
+// All 12 signs and descriptions taken from asl-study-reference.md (verified against Lifeprint / Dr. Bill Vicars). Do NOT add signs that have not been verified in that file.
+const SOTD_SIGNS=[
+{word:"HELLO",description:"Open flat hand (B-handshape). Touch fingertips to the forehead, then sweep the hand outward, like a casual salute. One smooth motion.",tip:""},
+{word:"THANK-YOU",description:"Flat hand, fingertips start at the chin/lips, palm facing you. Move the hand forward and slightly down toward the person you're thanking — like blowing a kiss. Smile.",tip:"Two hands = very grateful, or addressing a large audience."},
+{word:"PLEASE",description:"Flat open hand on the chest, rub in a gentle circular motion.",tip:"Different from SORRY: PLEASE uses an open hand, SORRY uses a fist."},
+{word:"SORRY",description:"A-hand (fist, thumb at the side — NOT thumb across like S). Place on the chest and rub in a small circular motion. Sincere facial expression.",tip:""},
+{word:"YES",description:"S-hand (fist, thumb across fingers). Nod the fist up and down, like a head nodding yes.",tip:""},
+{word:"NO",description:"Index + middle fingers extended together, thumb touching them; then open and close them against the thumb repeatedly — like a talking beak / snapping.",tip:"It must be two fingers + thumb; a one-finger pinch is a different articulation."},
+{word:"HELP",description:"Dominant hand in a loose A-hand (fist, thumb up — NOT tight S). Rest it on the open palm of the non-dominant hand, then lift both hands upward together.",tip:"Directional: moving it from yourself toward someone = I help you; toward yourself = you help me."},
+{word:"MEET",description:"Both hands in 1-handshapes (index fingers only — NOT D-hands with thumb tucked under). The two index fingers move toward each other and meet in the middle.",tip:"Directional: dominant hand moving toward the stationary non-dominant hand = I meet you."},
+{word:"NAME",description:"Both hands in H-handshapes (index + middle fingers extended together). The dominant H-hand taps twice across/on the non-dominant H-hand.",tip:"Double-tap = the noun (name); a single movement = the verb (to name / call)."},
+{word:"DEAF",description:"Index finger touches the cheek near the ear, then moves in a small arc to touch the cheek near the mouth. Touch the cheek — NOT the ear or lips themselves. One quick contact in fast signing.",tip:"Mouth-to-ear direction is also standard. Puffed cheek + bigger arc = Deaf and proud!"},
+{word:"WORK",description:"Both hands in S-handshapes (closed fists, thumb folded across the fingers), palms facing downward. The dominant fist, held above the non-dominant fist, taps down onto the wrist (or the back/thumb-side) of the non-dominant fist, in a downward striking motion. Repeat a few times (typically 2–3 taps).",tip:"Memory aid (Lifeprint): think of working with a hammer."},
+{word:"I-LOVE-YOU",description:"One hand only. Extend the thumb, index finger, and pinky; fold the middle and ring fingers down against the palm (thumb holds them down). Palm faces the viewer / forward. Static handshape (no movement).",tip:"It combines three fingerspelled letters: I (pinky up) + L (thumb + index) + Y (thumb + pinky)."}
+];
+function loadSignOfDay(){
+  const now=new Date();
+  const start=new Date(now.getFullYear(),0,0);
+  const dayOfYear=Math.floor((now-start)/86400000);
+  const sign=SOTD_SIGNS[(dayOfYear-1)%SOTD_SIGNS.length];
+  document.getElementById('sotd-date').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('sotd-word').textContent=sign.word;
+  document.getElementById('sotd-desc').textContent=sign.description;
+  const tipEl=document.getElementById('sotd-tip');
+  if(sign.tip){tipEl.textContent='💡 '+sign.tip;tipEl.style.display='block'}else{tipEl.style.display='none'}
+}
+loadSignOfDay();
+
+// ---------- events ----------
+const EV_MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const EV_DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+async function loadEvents(){
+  const el=document.getElementById('events');
+  el.innerHTML='<div class="empty">Loading…</div>';
+  const today=new Date();const iso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  const {data,error}=await sb.from('pulse_events').select('*').gte('event_date',iso).order('event_date',{ascending:true}).limit(60);
+  const list=(!error&&data)?data:[];
+  if(!list.length){el.innerHTML='<div class="empty">No events yet. Tap ＋ Add event and post the first one! 📅</div>';return}
+  el.innerHTML=list.map(e=>{
+    const p=e.event_date.split('-');const dt=new Date(+p[0],+p[1]-1,+p[2]);
+    const when=EV_DAYS[dt.getDay()]+', '+EV_MONTHS[dt.getMonth()]+' '+(+p[2])+(e.event_time?' · '+esc(e.event_time):'');
+    const where=[e.location,e.city,e.state].filter(Boolean).map(esc).join(' · ');
+    const mine=user&&e.created_by===user.id;
+    return '<div class="card" style="display:flex;gap:14px;padding:14px 16px;margin-bottom:12px">'
+      +'<div style="text-align:center;min-width:52px;background:#1a3a8a;border-radius:12px;padding:8px 4px;height:fit-content"><div style="font-size:11px;font-weight:800;color:#ffd166">'+EV_MONTHS[dt.getMonth()]+'</div><div style="font-size:22px;font-weight:900">'+(+p[2])+'</div></div>'
+      +'<div style="flex:1"><div style="font-size:16px;font-weight:800;margin-bottom:2px">'+esc(e.title)+'</div>'
+      +'<div style="color:var(--muted);font-size:13px">'+when+'</div>'
+      +(where?'<div style="color:var(--muted);font-size:13px">📍 '+where+'</div>':'')
+      +(e.description?'<p style="font-size:14px;margin-top:8px;line-height:1.5">'+esc(e.description)+'</p>':'')
+      +(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener" style="color:#7cc4ff;font-size:14px;font-weight:700">Event page →</a>':'')
+      +(mine?' <button onclick="deleteEvent(\''+e.id+'\')" style="background:none;border:0;color:#ff8080;font-size:13px;cursor:pointer;margin-left:10px">Delete</button>':'')
+      +'</div></div>';
+  }).join('');
+}
+async function deleteEvent(id){
+  const {error}=await sb.from('pulse_events').delete().eq('id',id);
+  if(error){alert(error.message);return}
+  alert('Event deleted');
+  loadEvents();
+}
+document.getElementById('ev-add-btn').onclick=()=>{
+  if(!user){alert('Join or log in to add an event');openAuth();return}
+  const f=document.getElementById('ev-form');
+  f.style.display=f.style.display==='none'?'block':'none';
+};
+document.getElementById('ev-cancel').onclick=()=>{document.getElementById('ev-form').style.display='none'};
+document.getElementById('ev-save').onclick=async()=>{
+  const title=document.getElementById('ev-title').value.trim();
+  const date=document.getElementById('ev-date').value;
+  if(!title){alert('Give your event a name');return}
+  if(!date){alert('Pick a date');return}
+  const payload={title,event_date:date,
+    event_time:document.getElementById('ev-time').value.trim()||null,
+    location:document.getElementById('ev-location').value.trim()||null,
+    city:document.getElementById('ev-city').value.trim()||null,
+    state:document.getElementById('ev-state').value.trim()||null,
+    url:document.getElementById('ev-url').value.trim()||null,
+    description:document.getElementById('ev-desc').value.trim()||null,
+    created_by:user.id};
+  const {error}=await sb.from('pulse_events').insert(payload);
+  if(error){alert(error.message);return}
+  document.getElementById('ev-form').style.display='none';
+  ['ev-title','ev-time','ev-location','ev-city','ev-state','ev-url','ev-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ev-date').value='';
+  alert('Event added 📅');
+  loadEvents();
+};
+
+// ---------- auth ----------
+async function refreshAuth(){
+  const {data:{session}}=await sb.auth.getSession();
+  user=session?.user||null;
+  await loadMyProfile();
+  await ensureProfile();
+  document.getElementById('hdr-auth').innerHTML=user
+    ?'<span style="font-size:13px;color:var(--muted)">'+esc(user.email)+'</span>'
+    :'<button class="btn" style="width:auto;padding:8px 18px" onclick="openAuth()">Join</button>';
+  document.getElementById('fab').style.display=user?'block':'none';
+  refreshNotifBadge();
+}
+function openAuth(){document.getElementById('auth-modal').classList.add('open')}
+document.getElementById('auth-cancel').onclick=()=>document.getElementById('auth-modal').classList.remove('open');
+document.getElementById('auth-toggle').onclick=()=>{
+  mode=mode==='signup'?'login':'signup';
+  document.getElementById('auth-title').textContent=mode==='signup'?'Join The Deaf Pulse':'Welcome back';
+  document.getElementById('auth-submit').textContent=mode==='signup'?'Sign Up':'Log In';
+  document.getElementById('auth-username').style.display=mode==='signup'?'block':'none';
+  document.getElementById('auth-signup-extra').style.display=mode==='signup'?'block':'none';
+  document.getElementById('auth-toggle').textContent=mode==='signup'?'Have an account? Log in':'New here? Sign up';
+};
+// ---------- age gate (COPPA: 13+) ----------
+function calcAge(dobStr){
+  const dob=new Date(dobStr+'T00:00:00');const now=new Date();
+  let age=now.getFullYear()-dob.getFullYear();
+  const m=now.getMonth()-dob.getMonth();
+  if(m<0||(m===0&&now.getDate()<dob.getDate()))age--;
+  return age;
+}
+let myProfile=null;
+async function ensureProfile(){
+  if(!user||myProfile)return;
+  let stash=null;try{stash=JSON.parse(localStorage.getItem('pulse_pending_profile')||'null')}catch(e){}
+  let uname=(stash&&stash.username)||(user.email||'user').split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g,'');
+  if(!uname)uname='user';
+  const dob=(stash&&stash.dob)||null;
+  let res=await sb.from('pulse_profiles').insert({id:user.id,username:uname,display_name:uname,dob});
+  if(res.error&&/duplicate|unique/i.test(res.error.message||'')){
+    const u2=(uname+Math.floor(Math.random()*900+100)).slice(0,24);
+    res=await sb.from('pulse_profiles').insert({id:user.id,username:u2,display_name:u2,dob});
+  }
+  if(!res.error){localStorage.removeItem('pulse_pending_profile');await loadMyProfile();}
+}
+async function loadMyProfile(){
+  if(!user){myProfile=null;return}
+  const {data}=await sb.from('pulse_profiles').select('*').eq('id',user.id).single();
+  myProfile=data||null;
+}
+// Prompt existing users (signed up before DOB was collected) to confirm age
+function ensureAgeVerified(){
+  if(myProfile&&myProfile.dob){
+    if(calcAge(myProfile.dob)<13){alert('You must be 13 or older to use Deaf Pulse.');return Promise.resolve(false)}
+    return Promise.resolve(true);
+  }
+  return new Promise(resolve=>{
+    document.getElementById('age-modal').classList.add('open');
+    document.getElementById('age-submit').onclick=async()=>{
+      const dob=document.getElementById('age-dob').value;
+      if(!dob){alert('Please enter your date of birth');return}
+      if(calcAge(dob)<13){alert('You must be 13 or older to use Deaf Pulse.');return}
+      const {error}=await sb.from('pulse_profiles').update({dob}).eq('id',user.id);
+      if(error){alert(error.message);return}
+      document.getElementById('age-modal').classList.remove('open');
+      await loadMyProfile();
+      resolve(true);
+    };
+    document.getElementById('age-cancel').onclick=()=>{
+      document.getElementById('age-modal').classList.remove('open');
+      resolve(false);
+    };
+  });
+}
+// ---------- identity verification: DROPPED ----------
+// Rob decided Oct 11, 2026: no mandatory ID verification (Facebook doesn't
+// require it either). Signup stays simple: email + 13+ age gate only.
+document.getElementById('auth-submit').onclick=async()=>{
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  const btn=document.getElementById('auth-submit');btn.disabled=true;
+  try{
+    if(mode==='signup'){
+      const username=document.getElementById('auth-username').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+      if(!username){alert('Pick a username');return}
+      // --- age gate: 13+ required ---
+      const dob=document.getElementById('auth-dob').value;
+      if(!dob){alert('Please enter your date of birth');return}
+      if(calcAge(dob)<13){alert('You must be 13 or older to use Deaf Pulse.');return}
+      const {data,error}=await sb.auth.signUp({email,password:pass});
+      if(error)throw error;
+      if(data.user){
+        localStorage.setItem('pulse_pending_profile',JSON.stringify({username,dob}));
+        if(data.session){
+          const {error:profErr}=await sb.from('pulse_profiles').insert({
+            id:data.user.id,username,display_name:username,dob
+          });
+          if(profErr)throw profErr;
+          localStorage.removeItem('pulse_pending_profile');
+        }else{
+          alert('Account created! Check your email and tap the confirmation link, then come back and Log in — your profile finishes setting up automatically.');
+        }
+      }
+    }else{
+      const {error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+    }
+    document.getElementById('auth-modal').classList.remove('open');
+    await refreshAuth();loadFeed();
+  }catch(e){alert(e.message)}finally{btn.disabled=false}
+};
+
+// ---------- feed ----------
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+// ---------- facebook bundle: helpers ----------
+const REACTIONS={like:'👍',love:'❤️',haha:'😆',wow:'😮',sad:'😢',angry:'😡'};
+const REACTION_LABELS={like:'Like',love:'Love',haha:'Haha',wow:'Wow',sad:'Sad',angry:'Angry'};
+let myReactionMap={};
+let myFollowSet=new Set();
+function avatarHTML(prof,size){
+  size=size||36;
+  const name=(prof&&(prof.display_name||prof.username))||'?';
+  const url=prof&&prof.avatar_url;
+  if(url)return '<img class="avatar" src="'+esc(url)+'" alt="" style="width:'+size+'px;height:'+size+'px;object-fit:cover"/>';
+  return '<div class="avatar" style="width:'+size+'px;height:'+size+'px;font-size:'+Math.max(11,Math.round(size*0.42))+'px">'+esc(name[0].toUpperCase())+'</div>';
+}
+async function sharePost(){
+  const url=location.origin+location.pathname;
+  if(navigator.share){
+    try{await navigator.share({title:'The Deaf Pulse',text:'Check out The Deaf Pulse — Sign, Share, and Belong. 🤟',url:url});}catch(e){}
+    return;
+  }
+  try{await navigator.clipboard.writeText(url);alert('Link copied ✓');}
+  catch(e){alert('Copy this link: '+url);}
+}
+async function toggleFollow(authorId,btn){
+  if(!user){openAuth();return}
+  if(authorId===user.id)return;
+  if(myFollowSet.has(authorId)){
+    await sb.from('pulse_follows').delete().eq('follower_id',user.id).eq('following_id',authorId);
+    myFollowSet.delete(authorId);
+    if(btn){btn.textContent='Follow';btn.classList.remove('on')}
+  }else{
+    const {error}=await sb.from('pulse_follows').insert({follower_id:user.id,following_id:authorId});
+    if(error){alert(error.message);return}
+    myFollowSet.add(authorId);
+    if(btn){btn.textContent='Following ✓';btn.classList.add('on')}
+  }
+}
+async function setReaction(postId,type){
+  if(!user){openAuth();return}
+  if(myReactionMap[postId]===type){
+    await sb.from('pulse_likes').delete().eq('post_id',postId).eq('user_id',user.id);
+    delete myReactionMap[postId];
+  }else{
+    await sb.from('pulse_likes').delete().eq('post_id',postId).eq('user_id',user.id);
+    let r=await sb.from('pulse_likes').insert({post_id:postId,user_id:user.id,reaction:type});
+    if(r.error){r=await sb.from('pulse_likes').insert({post_id:postId,user_id:user.id});}
+    if(r.error){alert(r.error.message);return}
+    myReactionMap[postId]=type;
+  }
+  loadFeed();
+}
+function toggleLike(postId){
+  if(myReactionMap[postId])setReaction(postId,myReactionMap[postId]);
+  else setReaction(postId,'like');
+}
+function togglePicker(postId){
+  const el=document.getElementById('picker-'+postId);
+  if(el)el.classList.toggle('open');
+}
+
+// ---------- feed ----------
+async function loadFeed(){
+  const el=document.getElementById('feed');el.innerHTML='<div class="empty">Loading…</div>';
+  const {data:posts}=await sb.from('pulse_posts').select('*,pulse_profiles!inner(username,display_name,avatar_url)').order('created_at',{ascending:false}).limit(30);
+  if(!posts||!posts.length){el.innerHTML='<div class="empty">No posts yet. Be the first to share! 🤟</div>';return}
+  // reactions: try with the reaction column, fall back to plain likes
+  let lq=await sb.from('pulse_likes').select('post_id,user_id,reaction');
+  if(lq.error){lq=await sb.from('pulse_likes').select('post_id,user_id');}
+  const likeAgg={};
+  myReactionMap={};
+  (lq.data||[]).forEach(l=>{
+    const a=likeAgg[l.post_id]||(likeAgg[l.post_id]={total:0,by:{}});
+    a.total++;
+    const t=l.reaction||'like';
+    a.by[t]=(a.by[t]||0)+1;
+    if(user&&l.user_id===user.id)myReactionMap[l.post_id]=t;
+  });
+  // comment counts
+  const commentCounts={};
+  const cq=await sb.from('pulse_comments').select('post_id');
+  (cq.data||[]).forEach(c=>{commentCounts[c.post_id]=(commentCounts[c.post_id]||0)+1});
+  // my follows
+  myFollowSet=new Set();
+  if(user){
+    const fq=await sb.from('pulse_follows').select('following_id').eq('follower_id',user.id);
+    (fq.data||[]).forEach(f=>myFollowSet.add(f.following_id));
+  }
+  el.innerHTML=posts.map(p=>{
+    const prof=p.pulse_profiles||{};
+    const mt=p.media_type||(p.video_url?'video':'text');
+    const mediaUrl=p.media_url||p.video_url;
+    let media='';
+    if(mt==='photo'&&mediaUrl){
+      media='<img class="post-img" src="'+esc(mediaUrl)+'" alt="Photo post" loading="lazy"/>';
+    }else if(mt!=='text'&&mediaUrl){
+      const track=p.captions_vtt?'<track kind="captions" label="English captions" srclang="en" src="'+URL.createObjectURL(new Blob([p.captions_vtt],{type:'text/vtt'}))+'">':'';
+      media='<video src="'+esc(mediaUrl)+'" controls playsinline preload="metadata">'+track+'</video>';
+    }
+    const agg=likeAgg[p.id];
+    let sum='';
+    if(agg&&agg.total){
+      const tops=Object.keys(agg.by).sort((a,b)=>agg.by[b]-agg.by[a]).slice(0,3).map(t=>REACTIONS[t]||'👍').join(' ');
+      sum='<div class="react-sum">'+tops+' '+agg.total+'</div>';
+    }
+    const cur=myReactionMap[p.id];
+    const picker='<div class="react-picker" id="picker-'+p.id+'">'
+      +Object.keys(REACTIONS).map(t=>'<button class="'+(cur===t?'mine':'')+'" title="'+REACTION_LABELS[t]+'" onclick="setReaction(\''+p.id+'\',\''+t+'\')">'+REACTIONS[t]+'</button>').join('')+'</div>';
+    const followBtn=(user&&p.user_id!==user.id)
+      ?'<button class="follow-btn'+(myFollowSet.has(p.user_id)?' on':'')+'" style="margin-left:auto" onclick="toggleFollow(\''+p.user_id+'\',this)">'+(myFollowSet.has(p.user_id)?'Following ✓':'Follow')+'</button>':'';
+    const bodyHtml= mt==='text'
+      ?'<div style="font-size:18px;font-weight:700;line-height:1.5;padding:4px 0 6px">'+esc(p.caption||'')+'</div>'
+      :(p.caption?'<div class="caption">'+esc(p.caption)+'</div>':'');
+    return '<div class="post">'+media
+    +'<div class="post-body"><div class="post-user">'+avatarHTML(prof,36)
+    +'<div><div class="uname">@'+esc(prof.username||'?')+'</div><div class="utime">'+new Date(p.created_at).toLocaleDateString()+'</div></div>'+followBtn+'</div>'
+    +bodyHtml+sum
+    +'<div class="actions"><button class="'+(cur?'liked':'')+'" onclick="toggleLike(\''+p.id+'\')">'+(cur?REACTIONS[cur]+' '+REACTION_LABELS[cur]:'👍 Like')+'</button>'
+    +'<button onclick="togglePicker(\''+p.id+'\')">😀 React</button>'
+    +'<button onclick="openComments(\''+p.id+'\')">💬 Comment'+(commentCounts[p.id]?' ('+commentCounts[p.id]+')':'')+'</button>'
+    +'<button onclick="sharePost()">↗ Share</button></div>'
+    +picker+'</div></div>';
+  }).join('');
+}
+
+// ---------- comments ----------
+let activeCommentPost=null;
+let pendingCommentVideo=null;
+function openComments(postId){
+  activeCommentPost=postId;
+  pendingCommentVideo=null;
+  document.getElementById('comment-video').value='';
+  document.getElementById('comment-video-name').textContent='';
+  document.getElementById('comment-input').value='';
+  document.getElementById('comments-modal').classList.add('open');
+  loadComments();
+}
+function closeComments(){document.getElementById('comments-modal').classList.remove('open');activeCommentPost=null;}
+async function loadComments(){
+  const el=document.getElementById('comments-list');
+  if(!activeCommentPost)return;
+  el.innerHTML='<div class="empty">Loading…</div>';
+  let r=await sb.from('pulse_comments').select('*,pulse_profiles(username,display_name,avatar_url)').eq('post_id',activeCommentPost).order('created_at',{ascending:true}).limit(100);
+  if(r.error){r=await sb.from('pulse_comments').select('*').eq('post_id',activeCommentPost).order('created_at',{ascending:true}).limit(100);}
+  const rows=r.data||[];
+  if(!rows.length){el.innerHTML='<div class="empty">No comments yet — be the first! 💬</div>';return}
+  el.innerHTML=rows.map(c=>{
+    const prof=c.pulse_profiles||{};
+    return '<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">'
+      +avatarHTML(prof,32)
+      +'<div style="flex:1"><div style="font-size:13px"><b>@'+esc(prof.username||'?')+'</b> <span style="color:var(--muted);font-size:12px">'+new Date(c.created_at).toLocaleDateString()+'</span></div>'
+      +(c.content?'<div style="font-size:14px;line-height:1.5">'+esc(c.content)+'</div>':'')
+      +(c.video_url?'<video src="'+esc(c.video_url)+'" controls playsinline style="width:100%;max-width:300px;border-radius:12px;margin-top:6px"></video>':'')
+      +'</div></div>';
+  }).join('');
+}
+async function sendComment(){
+  if(!user){openAuth();return}
+  if(!activeCommentPost)return;
+  const text=document.getElementById('comment-input').value.trim();
+  if(!text&&!pendingCommentVideo){alert('Write a comment or add a video first');return}
+  const btn=document.getElementById('comment-send');btn.disabled=true;btn.textContent='Sending…';
+  try{
+    let videoUrl=null;
+    if(pendingCommentVideo){
+      const path=user.id+'/comment-'+Date.now()+'-'+pendingCommentVideo.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      const {error:upErr}=await sb.storage.from('pulse-videos').upload(path,pendingCommentVideo);
+      if(upErr)throw upErr;
+      videoUrl=sb.storage.from('pulse-videos').getPublicUrl(path).data.publicUrl;
+    }
+    let r=await sb.from('pulse_comments').insert({post_id:activeCommentPost,user_id:user.id,content:text||null,video_url:videoUrl});
+    if(r.error&&videoUrl){
+      r=await sb.from('pulse_comments').insert({post_id:activeCommentPost,user_id:user.id,content:text||'📹 Video comment'});
+      if(!r.error)alert('Comment posted ✓ — video comments turn on fully after the one-time Pulse update.');
+    }
+    if(r.error)throw r.error;
+    document.getElementById('comment-input').value='';
+    pendingCommentVideo=null;
+    document.getElementById('comment-video').value='';
+    document.getElementById('comment-video-name').textContent='';
+    loadComments();
+  }catch(e){alert('Comment failed: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Send'}
+}
+document.getElementById('comment-send').onclick=sendComment;
+document.getElementById('comment-video').onchange=e=>{
+  pendingCommentVideo=e.target.files[0]||null;
+  document.getElementById('comment-video-name').textContent=pendingCommentVideo?('📹 '+pendingCommentVideo.name+' — tap Send to post it'):'';
+};
+
+// ---------- notifications (computed from existing tables; no new table) ----------
+function notifSeenAt(){return localStorage.getItem('pulse_notif_seen')||'1970-01-01T00:00:00.000Z';}
+async function computeNotifications(){
+  if(!user)return [];
+  const since=notifSeenAt();
+  const items=[];
+  const actorIds=new Set();
+  try{
+    const {data:myPosts}=await sb.from('pulse_posts').select('id').eq('user_id',user.id);
+    const ids=(myPosts||[]).map(p=>p.id);
+    if(ids.length){
+      const lq=await sb.from('pulse_likes').select('post_id,user_id,created_at').in('post_id',ids).neq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
+      (lq.data||[]).forEach(r=>{if(r.created_at>since){items.push({icon:'❤️',text:'liked your post',who:r.user_id,at:r.created_at});actorIds.add(r.user_id);}});
+      const cq=await sb.from('pulse_comments').select('post_id,user_id,created_at').in('post_id',ids).neq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
+      (cq.data||[]).forEach(r=>{if(r.created_at>since){items.push({icon:'💬',text:'commented on your post',who:r.user_id,at:r.created_at});actorIds.add(r.user_id);}});
+    }
+    const fq=await sb.from('pulse_follows').select('follower_id,created_at').eq('following_id',user.id).order('created_at',{ascending:false}).limit(30);
+    (fq.data||[]).forEach(r=>{if(r.created_at>since){items.push({icon:'➕',text:'started following you',who:r.follower_id,at:r.created_at});actorIds.add(r.follower_id);}});
+    const {data:mem}=await sb.from('pulse_conversation_members').select('conversation_id').eq('user_id',user.id);
+    const cids=(mem||[]).map(m=>m.conversation_id);
+    if(cids.length){
+      const mq=await sb.from('pulse_messages').select('sender_id,created_at,conversation_id').in('conversation_id',cids).neq('sender_id',user.id).gt('created_at',since).order('created_at',{ascending:false}).limit(30);
+      (mq.data||[]).forEach(r=>{items.push({icon:'💬',text:'sent you a message',who:r.sender_id,at:r.created_at});actorIds.add(r.sender_id);});
+    }
+    if(actorIds.size){
+      const {data:profs}=await sb.from('pulse_profiles').select('id,username').in('id',[...actorIds]);
+      const names={};(profs||[]).forEach(p=>names[p.id]='@'+p.username);
+      items.forEach(i=>i.whoName=names[i.who]||'Someone');
+    }
+    items.sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+    return items.slice(0,30);
+  }catch(e){return items;}
+}
+async function refreshNotifBadge(){
+  const b=document.getElementById('notif-badge');
+  if(!b)return;
+  if(!user){b.style.display='none';return}
+  const items=await computeNotifications();
+  if(items.length){b.textContent=items.length>9?'9+':String(items.length);b.style.display='block';}
+  else b.style.display='none';
+}
+async function openNotifications(){
+  if(!user){openAuth();return}
+  const el=document.getElementById('notif-list');
+  document.getElementById('notif-modal').classList.add('open');
+  el.innerHTML='<div class="empty">Loading…</div>';
+  const items=await computeNotifications();
+  el.innerHTML=items.length?items.map(i=>'<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px"><span>'+i.icon+'</span><div><b>'+esc(i.whoName||'Someone')+'</b> '+esc(i.text)+'<div style="color:var(--muted);font-size:12px">'+new Date(i.at).toLocaleString()+'</div></div></div>').join(''):'<div class="empty">All caught up! 🔔</div>';
+  localStorage.setItem('pulse_notif_seen',new Date().toISOString());
+  const b=document.getElementById('notif-badge');if(b)b.style.display='none';
+}
+function closeNotifications(){document.getElementById('notif-modal').classList.remove('open');}
+
+// ---------- new post ----------
+document.getElementById('fab').onclick=()=>document.getElementById('post-modal').classList.add('open');
+document.getElementById('post-cancel').onclick=()=>{
+  groupPostTarget=null;
+  document.querySelector('#post-modal h2').textContent='New sign post 🤟';
+  setPostType('video');
+  document.getElementById('post-modal').classList.remove('open');
+};
+function resetPostModal(){
+  document.getElementById('post-modal').classList.remove('open');
+  document.getElementById('post-caption').value='';
+  document.getElementById('post-words').value='';
+  document.getElementById('post-video').value='';
+  document.getElementById('post-photo').value='';
+  const pp=document.getElementById('post-photo-preview');pp.removeAttribute('src');pp.style.display='none';
+  document.getElementById('post-preview').classList.add('hidden');
+  groupPostTarget=null;
+  document.querySelector('#post-modal h2').textContent='New sign post 🤟';
+  setPostType('video');
+}
+document.getElementById('post-video').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const v=document.getElementById('post-preview');
+  v.src=URL.createObjectURL(f);v.classList.remove('hidden');
+};
+// ---------- post composer types: video / photo / text ----------
+let postType='video';
+function setPostType(t){
+  if(groupPostTarget&&t!=='video'){alert('Group posts are video for now 🤟');t='video';}
+  postType=t;
+  document.querySelectorAll('.type-toggle button').forEach(b=>b.classList.toggle('on',b.dataset.ptype===t));
+  document.getElementById('post-video').style.display=t==='video'?'block':'none';
+  const pv=document.getElementById('post-preview');
+  if(t==='video'&&document.getElementById('post-video').files[0])pv.classList.remove('hidden');else pv.classList.add('hidden');
+  document.getElementById('post-photo').style.display=t==='photo'?'block':'none';
+  document.getElementById('post-photo-preview').style.display=(t==='photo'&&document.getElementById('post-photo').files[0])?'block':'none';
+  document.getElementById('post-words').style.display=t==='video'?'block':'none';
+}
+document.getElementById('post-photo').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const v=document.getElementById('post-photo-preview');
+  v.src=URL.createObjectURL(f);v.style.display='block';
+};
+// ---------- optional video captions (Deaf-friendly: just type the words, we time them) ----------
+function wordsToVTT(text,dur){
+  const d=(isFinite(dur)&&dur>0)?dur:60;
+  const raw=text.replace(/\s+/g,' ').trim();
+  if(!raw)return null;
+  const words=raw.split(' '),chunks=[];let cur='';
+  words.forEach(w=>{if((cur+' '+w).trim().length>42&&cur){chunks.push(cur.trim());cur=w}else{cur=(cur+' '+w).trim()}});
+  if(cur)chunks.push(cur.trim());
+  const per=d/chunks.length;
+  const fmt=t=>{t=Math.max(0,t);const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=Math.floor(t%60),ms=Math.floor(t%1*1000);
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(ms).padStart(3,'0')};
+  let vtt='WEBVTT\n\n';
+  chunks.forEach((c,i)=>{vtt+=fmt(i*per)+' --> '+fmt((i+1)*per)+'\n'+c+'\n\n'});
+  return vtt;
+}
+document.getElementById('post-submit').onclick=async()=>{
+  if(!user){openAuth();return}
+  const wasGroupPost=groupPostTarget;
+  const caption=document.getElementById('post-caption').value.trim();
+  const btn=document.getElementById('post-submit');btn.disabled=true;btn.textContent='Posting…';
+  try{
+    if(wasGroupPost){
+      const f=document.getElementById('post-video').files[0];
+      if(!f){alert('Pick a video first');return}
+      const path=user.id+'/'+Date.now()+'-'+f.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      const {error:upErr}=await sb.storage.from('pulse-videos').upload(path,f);
+      if(upErr)throw upErr;
+      const {data:{publicUrl}}=sb.storage.from('pulse-videos').getPublicUrl(path);
+      const words=document.getElementById('post-words').value.trim();
+      const captions_vtt=words?wordsToVTT(words,document.getElementById('post-preview').duration):null;
+      const {error:insErr}=await sb.from('pulse_group_posts').insert({group_id:wasGroupPost,user_id:user.id,video_url:publicUrl,caption,captions_vtt});
+      if(insErr)throw insErr;
+    }else if(postType==='photo'){
+      const f=document.getElementById('post-photo').files[0];
+      if(!f){alert('Pick a photo first');return}
+      const path=user.id+'/'+Date.now()+'-photo-'+f.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      const {error:upErr}=await sb.storage.from('pulse-videos').upload(path,f);
+      if(upErr)throw upErr;
+      const {data:{publicUrl}}=sb.storage.from('pulse-videos').getPublicUrl(path);
+      const {error:insErr}=await sb.from('pulse_posts').insert({user_id:user.id,video_url:null,media_url:publicUrl,media_type:'photo',caption});
+      if(insErr){alert('Photo posts are not turned on yet — they will work after the next Pulse update.');return}
+    }else if(postType==='text'){
+      if(!caption){alert('Write something first');return}
+      const {error:insErr}=await sb.from('pulse_posts').insert({user_id:user.id,video_url:null,media_url:null,media_type:'text',caption});
+      if(insErr){alert('Text posts are not turned on yet — they will work after the next Pulse update.');return}
+    }else{
+      const f=document.getElementById('post-video').files[0];
+      if(!f){alert('Pick a video first');return}
+      const path=user.id+'/'+Date.now()+'-'+f.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      const {error:upErr}=await sb.storage.from('pulse-videos').upload(path,f);
+      if(upErr)throw upErr;
+      const {data:{publicUrl}}=sb.storage.from('pulse-videos').getPublicUrl(path);
+      const words=document.getElementById('post-words').value.trim();
+      const captions_vtt=words?wordsToVTT(words,document.getElementById('post-preview').duration):null;
+      let r=await sb.from('pulse_posts').insert({user_id:user.id,video_url:publicUrl,media_url:publicUrl,media_type:'video',caption,captions_vtt});
+      if(r.error)r=await sb.from('pulse_posts').insert({user_id:user.id,video_url:publicUrl,caption,captions_vtt});
+      if(r.error){
+        r=await sb.from('pulse_posts').insert({user_id:user.id,video_url:publicUrl,caption});
+        if(!r.error)alert('Posted ✓ — captions turn on after the one-time Pulse update.');
+      }
+      if(r.error)throw r.error;
+    }
+    resetPostModal();
+    if(wasGroupPost)loadGroupPosts();else loadFeed();
+  }catch(e){alert('Post failed: '+e.message)}finally{btn.disabled=false;btn.textContent='Share'}
+};
+
+// ---------- news ----------
+let newsCountry='All';
+async function loadNews(){
+  const el=document.getElementById('news');el.innerHTML='<div class="empty">Loading news…</div>';
+  let q=sb.from('pulse_news').select('*').order('published_at',{ascending:false}).limit(40);
+  if(newsCountry!=='All')q=q.eq('country',newsCountry);
+  const {data}=await q;
+  const {data:countries}=await sb.from('pulse_news').select('country');
+  const uniq=['All',...new Set((countries||[]).map(c=>c.country).filter(Boolean))];
+  document.getElementById('news-filters').innerHTML=uniq.map(c=>
+    '<button onclick="setCountry(\''+esc(c)+'\')" style="background:'+(c===newsCountry?'var(--p1)':'var(--card)')+';border:1px solid var(--border);color:#fff;border-radius:20px;padding:8px 16px;font-size:13px;white-space:nowrap;cursor:pointer">'+esc(c)+'</button>').join('');
+  if(!data||!data.length){el.innerHTML='<div class="empty">No news yet. Check back soon! 📰</div>';return}
+  el.innerHTML=data.map(n=>
+    '<a class="news-card" href="'+esc(n.url||'#')+'" target="_blank" rel="noopener">'
+    +(n.image_url?'<img src="'+esc(n.image_url)+'" alt="'+esc(n.title||'Deaf news image')+'" loading="lazy"/>':'')
+    +'<div class="news-body"><div class="news-country">'+esc(n.country||'World')+(n.region?' · '+esc(n.region):'')+'</div>'
+    +'<div class="news-title">'+esc(n.title)+'</div>'
+    +(n.summary?'<div class="news-summary">'+esc(n.summary)+'</div>':'')+'</div></a>').join('');
+}
+function setCountry(c){newsCountry=c;loadNews()}
+
+// ---------- profile ----------
+async function loadProfile(){
+  const el=document.getElementById('profile');
+  if(!user){el.innerHTML='<div class="card"><h2>Your profile</h2><p style="color:var(--muted);margin-bottom:16px">Join to create your profile and start posting.</p><button class="btn" onclick="openAuth()">Join The Deaf Pulse</button></div>';return}
+  const {data:prof}=await sb.from('pulse_profiles').select('*').eq('id',user.id).single();
+  const {data:posts}=await sb.from('pulse_posts').select('id').eq('user_id',user.id);
+  const {data:follows}=await sb.from('pulse_follows').select('id').eq('follower_id',user.id);
+  const {data:followers}=await sb.from('pulse_follows').select('id').eq('following_id',user.id);
+  const p=prof||{};
+  el.innerHTML='<div class="card"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">'
+    +avatarHTML(p,56)
+    +'<div><div style="font-size:18px;font-weight:800">@'+esc(p.username||'?')+'</div>'
+    +'<div style="color:var(--muted);font-size:13px">'+esc(user.email)+'</div></div></div>'
+    +(p.bio?'<p style="font-size:14px;line-height:1.5;margin-bottom:16px">'+esc(p.bio)+'</p>':'')
+    +(p.intro_video_url?'<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">👋 My sign intro</div><video src="'+esc(p.intro_video_url)+'" controls playsinline style="width:100%;border-radius:12px;background:#000"></video></div>':'')
+    +'<div style="display:flex;gap:24px;margin-bottom:16px"><div><b>'+(posts?posts.length:0)+'</b> <span style="color:var(--muted)">posts</span></div><div><b>'+(follows?follows.length:0)+'</b> <span style="color:var(--muted)">following</span></div><div><b>'+(followers?followers.length:0)+'</b> <span style="color:var(--muted)">followers</span></div></div>'
+    +'<button class="btn" id="edit-profile-btn" style="margin-bottom:8px">✏️ Edit profile</button>'
+    +'<div id="edit-profile-form" class="hidden" style="margin-bottom:8px">'
+    +'<label style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Display name</label>'
+    +'<input type="text" id="ep-name" maxlength="40" value="'+esc(p.display_name||'')+'"/>'
+    +'<label style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Bio</label>'
+    +'<textarea id="ep-bio" rows="3" maxlength="300" placeholder="Tell people about yourself…">'+esc(p.bio||'')+'</textarea>'
+    +'<label style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Profile photo</label>'
+    +'<input type="file" id="ep-avatar" accept="image/*"/>'
+    +'<label style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Video intro — a short signing hello that tops your profile 🤟</label>'
+    +'<input type="file" id="ep-intro" accept="video/*" capture="user"/>'
+    +'<button class="btn" id="ep-save">Save profile</button>'
+    +'</div>'
+    +'<button class="btn btn-sec" id="logout">Log out</button></div>';
+  document.getElementById('logout').onclick=async()=>{await sb.auth.signOut();await refreshAuth();loadFeed();loadProfile()};
+  document.getElementById('edit-profile-btn').onclick=()=>document.getElementById('edit-profile-form').classList.toggle('hidden');
+  document.getElementById('ep-save').onclick=saveEditProfile;
+}
+async function saveEditProfile(){
+  const btn=document.getElementById('ep-save');btn.disabled=true;btn.textContent='Saving…';
+  try{
+    const upd={
+      display_name:document.getElementById('ep-name').value.trim()||null,
+      bio:document.getElementById('ep-bio').value.trim()||null
+    };
+    const av=document.getElementById('ep-avatar').files[0];
+    if(av){
+      const path=user.id+'/avatar-'+Date.now()+'-'+av.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      const {error:upErr}=await sb.storage.from('pulse-videos').upload(path,av);
+      if(upErr)throw upErr;
+      upd.avatar_url=sb.storage.from('pulse-videos').getPublicUrl(path).data.publicUrl;
+    }
+    const iv=document.getElementById('ep-intro').files[0];
+    if(iv){
+      const path=user.id+'/intro-'+Date.now()+'-'+iv.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      const {error:upErr}=await sb.storage.from('pulse-videos').upload(path,iv);
+      if(upErr)throw upErr;
+      upd.intro_video_url=sb.storage.from('pulse-videos').getPublicUrl(path).data.publicUrl;
+    }
+    let res=await sb.from('pulse_profiles').update(upd).eq('id',user.id);
+    let introPending=false;
+    if(res.error&&upd.intro_video_url){
+      delete upd.intro_video_url;
+      introPending=true;
+      res=await sb.from('pulse_profiles').update(upd).eq('id',user.id);
+    }
+    if(res.error)throw res.error;
+    alert(introPending?'Profile saved ✓ — your video intro will stick after the one-time Pulse update.':'Profile saved ✓');
+    await loadMyProfile();
+    loadProfile();
+    loadFeed();
+  }catch(e){alert('Could not save profile: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Save profile'}
+}
+
+// ---------- messaging: DMs + group chats (max 20 members) ----------
+const MAX_GROUP_MEMBERS=20;
+let activeConvo=null;
+let activeConvoInfo=null; // {id,name,is_group,members:[{user_id,role,username,display_name}]}
+let chatMode='dm';
+let selectedUserIds=[];
+
+async function loadConversations(){
+  const el=document.getElementById('convo-list');
+  document.getElementById('chat-view').classList.add('hidden');
+  el.classList.remove('hidden');
+  if(!user){el.innerHTML='<div class="card"><h2>Messages</h2><p style="color:var(--muted);margin-bottom:16px">Log in to send video messages.</p><button class="btn" onclick="openAuth()">Join The Deaf Pulse</button></div>';return}
+  el.innerHTML='<div class="empty">Loading chats…</div>';
+  const {data:members}=await sb.from('pulse_conversation_members').select('conversation_id').eq('user_id',user.id);
+  if(!members||!members.length){el.innerHTML='<div class="empty">No conversations yet.<br/>Tap ＋ New chat to start one! 💬</div>';return}
+  const convoIds=members.map(m=>m.conversation_id);
+  const {data:convos}=await sb.from('pulse_conversations').select('*').in('id',convoIds).order('created_at',{ascending:false});
+  const {data:allMembers}=await sb.from('pulse_conversation_members').select('conversation_id,user_id').in('conversation_id',convoIds);
+  const uidSet={};(allMembers||[]).forEach(m=>uidSet[m.user_id]=1);
+  const uidList=Object.keys(uidSet);
+  let profMap={};
+  if(uidList.length){
+    const {data:profiles}=await sb.from('pulse_profiles').select('id,username,display_name,avatar_url').in('id',uidList);
+    (profiles||[]).forEach(p=>profMap[p.id]=p);
+  }
+  const byConvo={};(allMembers||[]).forEach(m=>{(byConvo[m.conversation_id]=byConvo[m.conversation_id]||[]).push(m)});
+  el.innerHTML=(convos||[]).map(c=>{
+    const mems=byConvo[c.id]||[];
+    let title,sub;
+    if(c.is_group){
+      title='👥 '+esc(c.name||'Group chat');
+      sub=mems.length+' member'+(mems.length===1?'':'s');
+    }else{
+      const other=mems.find(m=>m.user_id!==user.id);
+      const p=other&&profMap[other.user_id];
+      title='💬 @'+esc((p&&(p.display_name||p.username))||'chat');
+      sub=new Date(c.created_at).toLocaleDateString();
+    }
+    return '<div class="card" style="cursor:pointer;margin-bottom:10px" onclick="openChat(\''+c.id+'\')">'
+      +'<div style="font-weight:700">'+title+'</div>'
+      +'<div style="font-size:12px;color:var(--muted)">'+sub+'</div></div>';
+  }).join('')||'<div class="empty">No conversations yet.</div>';
+}
+async function openChat(convoId){
+  activeConvo=convoId;
+  const {data:convo}=await sb.from('pulse_conversations').select('*').eq('id',convoId).single();
+  const {data:mems}=await sb.from('pulse_conversation_members').select('conversation_id,user_id,role').eq('conversation_id',convoId);
+  const uids=(mems||[]).map(m=>m.user_id);
+  let pmap={};
+  if(uids.length){
+    const {data:profs}=await sb.from('pulse_profiles').select('id,username,display_name,avatar_url').in('id',uids);
+    (profs||[]).forEach(p=>pmap[p.id]=p);
+  }
+  activeConvoInfo={id:convoId,name:convo?convo.name:null,is_group:!!(convo&&convo.is_group),
+    members:(mems||[]).map(m=>({user_id:m.user_id,role:m.role,username:(pmap[m.user_id]||{}).username,display_name:(pmap[m.user_id]||{}).display_name,avatar_url:(pmap[m.user_id]||{}).avatar_url}))};
+  document.getElementById('convo-list').classList.add('hidden');
+  document.getElementById('chat-view').classList.remove('hidden');
+  renderChatHeader();
+  loadMessages();
+}
+function renderChatHeader(){
+  const h=document.getElementById('chat-header');
+  if(!activeConvoInfo){h.innerHTML='';return}
+  if(activeConvoInfo.is_group){
+    const n=activeConvoInfo.members.length;
+    h.innerHTML='<div class="card" style="cursor:pointer;margin-bottom:0;padding:12px 16px" onclick="openMembersModal()">'
+      +'<div style="font-weight:800">👥 '+esc(activeConvoInfo.name||'Group chat')+'</div>'
+      +'<div style="font-size:12px;color:var(--muted)">'+n+' member'+(n===1?'':'s')+' · tap to manage</div></div>';
+  }else{
+    const other=activeConvoInfo.members.find(m=>m.user_id!==user.id);
+    const nm=other?('@'+(other.display_name||other.username||'?')):'Chat';
+    h.innerHTML='<div class="card" style="margin-bottom:0;padding:12px 16px"><div style="font-weight:800">💬 '+esc(nm)+'</div></div>';
+  }
+}
+document.getElementById('chat-back').onclick=()=>{activeConvo=null;activeConvoInfo=null;loadConversations()};
+async function loadMessages(){
+  const el=document.getElementById('chat-messages');
+  const {data:msgs}=await sb.from('pulse_messages').select('*').eq('conversation_id',activeConvo).order('created_at',{ascending:true}).limit(100);
+  let nameMap={};
+  if(activeConvoInfo&&activeConvoInfo.is_group){
+    activeConvoInfo.members.forEach(m=>{nameMap[m.user_id]=m.display_name||m.username||'?'});
+  }
+  el.innerHTML=(msgs||[]).map(m=>{
+    const mine=m.sender_id===user.id;
+    const body=m.message_type==='video'
+      ?'<video src="'+esc(m.video_url)+'" controls playsinline style="width:100%;max-width:280px;border-radius:12px"></video>'
+      :'<div>'+esc(m.content)+'</div>';
+    const sender=(!mine&&activeConvoInfo&&activeConvoInfo.is_group)
+      ?'<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700">'+esc(nameMap[m.sender_id]||'?')+'</div>':'';
+    return '<div style="display:flex;justify-content:'+(mine?'flex-end':'flex-start')+';margin-bottom:10px">'
+      +'<div style="background:'+(mine?'#3a3a40':'var(--card)')+';border:1px solid var(--border);border-radius:14px;padding:10px 14px;max-width:80%;font-size:14px">'+sender+body+'</div></div>';
+  }).join('')||'<div class="empty">Say hi! 👋</div>';
+  el.scrollTop=el.scrollHeight;
+}
+document.getElementById('chat-send').onclick=async()=>{
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text||!activeConvo)return;
+  input.value='';
+  await sb.from('pulse_messages').insert({conversation_id:activeConvo,sender_id:user.id,message_type:'text',content:text});
+  loadMessages();
+};
+document.getElementById('chat-video-btn').onclick=()=>document.getElementById('chat-video').click();
+document.getElementById('chat-video').onchange=async e=>{
+  const f=e.target.files[0];
+  if(!f||!activeConvo)return;
+  const path=user.id+'/'+Date.now()+'-msg-'+f.name.replace(/[^a-zA-Z0-9.]/g,'_');
+  const {error}=await sb.storage.from('pulse-videos').upload(path,f);
+  if(error){alert('Upload failed: '+error.message);return}
+  const {data:{publicUrl}}=sb.storage.from('pulse-videos').getPublicUrl(path);
+  await sb.from('pulse_messages').insert({conversation_id:activeConvo,sender_id:user.id,message_type:'video',video_url:publicUrl});
+  e.target.value='';
+  loadMessages();
+};
+
+// ---------- new chat modal (DM or group) ----------
+document.getElementById('new-chat-btn').onclick=async()=>{
+  if(!user){openAuth();return}
+  const ok=await ensureAgeVerified();
+  if(!ok)return;
+  chatMode='dm';selectedUserIds=[];
+  document.getElementById('group-name').value='';
+  document.getElementById('user-search').value='';
+  document.getElementById('user-results').innerHTML='';
+  setChatMode('dm');
+  document.getElementById('chat-modal').classList.add('open');
+};
+function setChatMode(m){
+  chatMode=m;
+  const dmBtn=document.getElementById('mode-dm'),gBtn=document.getElementById('mode-group');
+  dmBtn.className=m==='dm'?'btn':'btn btn-sec';
+  gBtn.className=m==='group'?'btn':'btn btn-sec';
+  dmBtn.style.marginTop='0';gBtn.style.marginTop='0';
+  document.getElementById('group-name-wrap').classList.toggle('hidden',m!=='group');
+  renderSelectedMembers();
+  document.getElementById('chat-create').textContent=m==='group'?'Create group chat':'Start chat';
+}
+document.getElementById('mode-dm').onclick=()=>setChatMode('dm');
+document.getElementById('mode-group').onclick=()=>setChatMode('group');
+document.getElementById('chat-modal-cancel').onclick=()=>document.getElementById('chat-modal').classList.remove('open');
+let searchTimer=null;
+document.getElementById('user-search').oninput=e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>searchUsers(e.target.value.trim()),300);
+};
+async function searchUsers(q){
+  const box=document.getElementById('user-results');
+  if(!q||q.length<2){box.innerHTML='';return}
+  const {data}=await sb.from('pulse_profiles').select('id,username,display_name,avatar_url')
+    .ilike('username','%'+q+'%').neq('id',user.id).limit(10);
+  box.innerHTML=(data||[]).map(p=>{
+    const added=selectedUserIds.indexOf(p.id)>=0;
+    const lbl=p.display_name&&p.display_name!==p.username
+      ?'<b>@'+esc(p.username)+'</b> <span style="color:var(--muted)">'+esc(p.display_name)+'</span>'
+      :'<b>@'+esc(p.username)+'</b>';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+      +'<div>'+lbl+'</div>'
+      +'<button class="btn" style="width:auto;padding:6px 14px;font-size:13px" '+(added?'disabled':'')+' onclick="toggleSelectUser(\''+p.id+'\')">'+(added?'Added ✓':'Add')+'</button></div>';
+  }).join('')||'<div style="color:var(--muted);font-size:13px;padding:8px 0">No matches.</div>';
+}
+function toggleSelectUser(id){
+  const i=selectedUserIds.indexOf(id);
+  if(i>=0){selectedUserIds.splice(i,1)}
+  else{
+    if(chatMode==='dm'){selectedUserIds=[id];createChat();return}
+    if(selectedUserIds.length>=MAX_GROUP_MEMBERS-1){alert('Group chats are limited to '+MAX_GROUP_MEMBERS+' people.');return}
+    selectedUserIds.push(id);
+  }
+  renderSelectedMembers();
+  searchUsers(document.getElementById('user-search').value.trim());
+}
+async function renderSelectedMembers(){
+  const box=document.getElementById('selected-members');
+  const cnt=document.getElementById('member-count');
+  if(!selectedUserIds.length){
+    box.innerHTML='';
+    cnt.textContent=chatMode==='group'?'Add up to '+(MAX_GROUP_MEMBERS-1)+' people (plus you = '+MAX_GROUP_MEMBERS+' max)':'';
+    return;
+  }
+  const {data}=await sb.from('pulse_profiles').select('id,username').in('id',selectedUserIds);
+  const map={};(data||[]).forEach(p=>map[p.id]=p.username);
+  box.innerHTML=selectedUserIds.map(id=>
+    '<span style="background:#2a2a2e;border:1px solid var(--border);border-radius:20px;padding:6px 8px 6px 14px;font-size:13px">@'+esc(map[id]||'?')
+    +' <button onclick="toggleSelectUser(\''+id+'\')" style="background:none;border:0;color:var(--muted);cursor:pointer;font-size:14px">×</button></span>').join('');
+  cnt.textContent=chatMode==='group'
+    ?(selectedUserIds.length+1)+' of '+MAX_GROUP_MEMBERS+' members (including you)'
+    :'';
+}
+document.getElementById('chat-create').onclick=()=>createChat();
+async function createChat(){
+  const btn=document.getElementById('chat-create');btn.disabled=true;
+  try{
+    if(chatMode==='dm'){
+      if(!selectedUserIds.length){alert('Pick someone to chat with');return}
+      const otherId=selectedUserIds[0];
+      const existing=await findExistingDM(otherId);
+      document.getElementById('chat-modal').classList.remove('open');
+      if(existing){openChat(existing)}
+      else{
+        const {data:convo,error}=await sb.from('pulse_conversations').insert({is_group:false,created_by:user.id}).select().single();
+        if(error)throw error;
+        const {error:mErr}=await sb.from('pulse_conversation_members').insert([
+          {conversation_id:convo.id,user_id:user.id,role:'admin'},
+          {conversation_id:convo.id,user_id:otherId,role:'member'}
+        ]);
+        if(mErr)throw mErr;
+        openChat(convo.id);
+      }
+    }else{
+      const name=document.getElementById('group-name').value.trim();
+      if(!name){alert('Give your group a name');return}
+      if(!selectedUserIds.length){alert('Add at least one person');return}
+      if(selectedUserIds.length+1>MAX_GROUP_MEMBERS){alert('Group chats are limited to '+MAX_GROUP_MEMBERS+' people.');return}
+      const {data:convo,error}=await sb.from('pulse_conversations').insert({name,is_group:true,created_by:user.id}).select().single();
+      if(error)throw error;
+      const rows=[{conversation_id:convo.id,user_id:user.id,role:'admin'}]
+        .concat(selectedUserIds.map(id=>({conversation_id:convo.id,user_id:id,role:'member'})));
+      const {error:mErr}=await sb.from('pulse_conversation_members').insert(rows);
+      if(mErr)throw mErr;
+      document.getElementById('chat-modal').classList.remove('open');
+      openChat(convo.id);
+    }
+  }catch(e){alert('Could not create chat: '+e.message)}finally{btn.disabled=false}
+}
+async function findExistingDM(otherId){
+  const {data:mine}=await sb.from('pulse_conversation_members').select('conversation_id').eq('user_id',user.id);
+  if(!mine||!mine.length)return null;
+  const myIds=mine.map(m=>m.conversation_id);
+  const {data:theirs}=await sb.from('pulse_conversation_members').select('conversation_id').eq('user_id',otherId).in('conversation_id',myIds);
+  if(!theirs||!theirs.length)return null;
+  const shared=theirs.map(m=>m.conversation_id);
+  const {data:convos}=await sb.from('pulse_conversations').select('id').in('id',shared).eq('is_group',false).limit(1);
+  return convos&&convos.length?convos[0].id:null;
+}
+
+// ---------- group chat members modal ----------
+function amIAdmin(){
+  if(!activeConvoInfo||!user)return false;
+  const me=activeConvoInfo.members.find(m=>m.user_id===user.id);
+  return !!(me&&me.role==='admin');
+}
+function openMembersModal(){
+  renderMembersModal();
+  document.getElementById('members-modal').classList.add('open');
+}
+document.getElementById('members-close').onclick=()=>document.getElementById('members-modal').classList.remove('open');
+function renderMembersModal(){
+  const info=activeConvoInfo;
+  if(!info)return;
+  document.getElementById('members-title').textContent='👥 '+(info.name||'Group chat');
+  const admin=amIAdmin();
+  document.getElementById('members-list').innerHTML=info.members.map(m=>{
+    const canRemove=admin&&m.user_id!==user.id;
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="display:flex;align-items:center;gap:10px">'+avatarHTML(m,36)
+      +'<div><div style="font-weight:700">@'+esc(m.username||'?')+'</div>'
+      +(m.display_name&&m.display_name!==m.username?'<div style="font-size:12px;color:var(--muted)">'+esc(m.display_name)+'</div>':'')
+      +(m.role==='admin'?'<div style="font-size:11px;color:var(--p3);font-weight:700">ADMIN</div>':'')+'</div></div>'
+      +(canRemove?'<button class="btn btn-sec" style="width:auto;padding:6px 14px;font-size:13px;margin-top:0" onclick="removeMember(\''+m.user_id+'\')">Remove</button>':'')
+      +'</div>';
+  }).join('');
+  const addWrap=document.getElementById('members-add-wrap');
+  addWrap.classList.toggle('hidden',!admin);
+  if(admin){
+    const remaining=MAX_GROUP_MEMBERS-info.members.length;
+    const sInput=document.getElementById('members-search');
+    sInput.placeholder=remaining>0?'Search by username… ('+remaining+' spots left)':'Group is full ('+MAX_GROUP_MEMBERS+' max)';
+    sInput.disabled=remaining<=0;
+  }
+}
+async function removeMember(uid){
+  if(!confirm('Remove this person from the group?'))return;
+  const {error}=await sb.from('pulse_conversation_members').delete().eq('conversation_id',activeConvo).eq('user_id',uid);
+  if(error){alert(error.message);return}
+  await openChat(activeConvo);
+  renderMembersModal();
+}
+let memberSearchTimer=null;
+document.getElementById('members-search').oninput=e=>{
+  clearTimeout(memberSearchTimer);
+  memberSearchTimer=setTimeout(()=>searchMembersToAdd(e.target.value.trim()),300);
+};
+async function searchMembersToAdd(q){
+  const box=document.getElementById('members-search-results');
+  if(!q||q.length<2){box.innerHTML='';return}
+  const existing=activeConvoInfo.members.map(m=>m.user_id);
+  const {data}=await sb.from('pulse_profiles').select('id,username,display_name,avatar_url').ilike('username','%'+q+'%').limit(10);
+  const filtered=(data||[]).filter(p=>existing.indexOf(p.id)<0&&p.id!==user.id);
+  box.innerHTML=filtered.map(p=>
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+    +'<div><b>@'+esc(p.username)+'</b></div>'
+    +'<button class="btn" style="width:auto;padding:6px 14px;font-size:13px" onclick="addMember(\''+p.id+'\')">Add</button></div>'
+  ).join('')||'<div style="color:var(--muted);font-size:13px;padding:8px 0">No matches.</div>';
+}
+async function addMember(uid){
+  if(activeConvoInfo.members.length>=MAX_GROUP_MEMBERS){alert('Group chats are limited to '+MAX_GROUP_MEMBERS+' people.');return}
+  const {error}=await sb.from('pulse_conversation_members').insert({conversation_id:activeConvo,user_id:uid,role:'member'});
+  if(error){alert(error.message);return}
+  document.getElementById('members-search').value='';
+  document.getElementById('members-search-results').innerHTML='';
+  await openChat(activeConvo);
+  renderMembersModal();
+}
+
+// ---------- group pages (Facebook-Groups style) ----------
+let activeGroup=null;
+let activeGroupInfo=null;
+let groupPostTarget=null; // group_id when the post modal is posting to a group
+document.getElementById('new-group-btn').onclick=async()=>{
+  if(!user){openAuth();return}
+  const ok=await ensureAgeVerified();
+  if(!ok)return;
+  document.getElementById('group-page-name').value='';
+  document.getElementById('group-page-desc').value='';
+  document.getElementById('group-modal').classList.add('open');
+};
+document.getElementById('group-modal-cancel').onclick=()=>document.getElementById('group-modal').classList.remove('open');
+document.getElementById('group-page-create').onclick=async()=>{
+  const name=document.getElementById('group-page-name').value.trim();
+  const description=document.getElementById('group-page-desc').value.trim();
+  if(!name){alert('Give your group a name');return}
+  const btn=document.getElementById('group-page-create');btn.disabled=true;
+  try{
+    const {data:g,error}=await sb.from('pulse_groups').insert({name,description,created_by:user.id}).select().single();
+    if(error)throw error;
+    const {error:mErr}=await sb.from('pulse_group_members').insert({group_id:g.id,user_id:user.id,role:'admin'});
+    if(mErr)throw mErr;
+    document.getElementById('group-modal').classList.remove('open');
+    openGroup(g.id);
+  }catch(e){alert('Could not create group: '+e.message)}finally{btn.disabled=false}
+};
+async function loadGroups(){
+  const el=document.getElementById('group-list');
+  document.getElementById('group-view').classList.add('hidden');
+  el.classList.remove('hidden');
+  el.innerHTML='<div class="empty">Loading groups…</div>';
+  const {data:groups}=await sb.from('pulse_groups').select('*').order('created_at',{ascending:false}).limit(50);
+  if(!groups||!groups.length){el.innerHTML='<div class="empty">No groups yet.<br/>Tap ＋ New group to start one! 👥</div>';return}
+  const ids=groups.map(g=>g.id);
+  const {data:counts}=await sb.from('pulse_group_members').select('group_id').in('group_id',ids);
+  const countMap={};(counts||[]).forEach(c=>countMap[c.group_id]=(countMap[c.group_id]||0)+1);
+  let myGroups={};
+  if(user){
+    const {data:mine}=await sb.from('pulse_group_members').select('group_id').eq('user_id',user.id);
+    (mine||[]).forEach(m=>myGroups[m.group_id]=1);
+  }
+  el.innerHTML=groups.map(g=>{
+    const n=countMap[g.id]||0;
+    return '<div class="card" style="cursor:pointer;margin-bottom:10px" onclick="openGroup(\''+g.id+'\')">'
+    +'<div style="display:flex;align-items:center;gap:12px"><div class="avatar" style="width:44px;height:44px;font-size:20px">👥</div>'
+    +'<div style="flex:1"><div style="font-weight:800">'+esc(g.name)+'</div>'
+    +'<div style="font-size:12px;color:var(--muted)">'+n+' member'+(n===1?'':'s')
+    +(myGroups[g.id]?' · <span style="color:var(--p2)">Joined ✓</span>':'')+'</div>'
+    +(g.description?'<div style="font-size:13px;color:var(--muted);margin-top:4px">'+esc(g.description.slice(0,100))+'</div>':'')
+    +'</div></div></div>';
+  }).join('');
+}
+async function openGroup(groupId){
+  activeGroup=groupId;
+  const {data:g}=await sb.from('pulse_groups').select('*').eq('id',groupId).single();
+  if(!g){alert('Group not found');return}
+  const {data:mems}=await sb.from('pulse_group_members').select('group_id,user_id,role').eq('group_id',groupId);
+  const uids=(mems||[]).map(m=>m.user_id);
+  let pmap={};
+  if(uids.length){
+    const {data:profs}=await sb.from('pulse_profiles').select('id,username,display_name,avatar_url').in('id',uids);
+    (profs||[]).forEach(p=>pmap[p.id]=p);
+  }
+  activeGroupInfo={group:g,members:(mems||[]).map(m=>({user_id:m.user_id,role:m.role,username:(pmap[m.user_id]||{}).username,display_name:(pmap[m.user_id]||{}).display_name,avatar_url:(pmap[m.user_id]||{}).avatar_url}))};
+  document.getElementById('group-list').classList.add('hidden');
+  document.getElementById('group-view').classList.remove('hidden');
+  renderGroupDetail();
+  loadGroupPosts();
+}
+document.getElementById('group-back').onclick=()=>{activeGroup=null;activeGroupInfo=null;loadGroups()};
+function groupAmIMember(){
+  if(!activeGroupInfo||!user)return false;
+  return activeGroupInfo.members.some(m=>m.user_id===user.id);
+}
+function groupAmIAdmin(){
+  if(!activeGroupInfo||!user)return false;
+  const me=activeGroupInfo.members.find(m=>m.user_id===user.id);
+  return !!(me&&me.role==='admin');
+}
+function renderGroupDetail(){
+  const el=document.getElementById('group-detail');
+  const g=activeGroupInfo.group;
+  const n=activeGroupInfo.members.length;
+  const isMember=groupAmIMember();
+  const isAdmin=groupAmIAdmin();
+  let actionBtn='';
+  if(!user)actionBtn='<button class="btn" onclick="openAuth()">Join to participate</button>';
+  else if(isMember)actionBtn='<button class="btn btn-sec" onclick="leaveGroup()">Leave group</button>';
+  else actionBtn='<button class="btn" onclick="joinGroup()">Join group</button>';
+  const memberChips=activeGroupInfo.members.slice(0,12).map(m=>
+    '<span style="display:inline-flex;align-items:center;gap:6px;background:#1a1a1e;border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 4px;font-size:12px;margin:0 6px 6px 0">'
+    +avatarHTML(m,24)+'@'+esc(m.username||'?')
+    +(isAdmin&&m.user_id!==user.id?' <a href="javascript:void(0)" onclick="removeGroupMember(\''+m.user_id+'\')" style="color:var(--muted);text-decoration:none">×</a>':'')
+    +'</span>').join('');
+  el.innerHTML='<div class="card" style="margin-bottom:16px">'
+    +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px"><div class="avatar" style="width:56px;height:56px;font-size:26px">👥</div>'
+    +'<div><div style="font-size:20px;font-weight:800">'+esc(g.name)+'</div>'
+    +'<div style="color:var(--muted);font-size:13px">'+n+' member'+(n===1?'':'s')+'</div></div></div>'
+    +(g.description?'<p style="font-size:14px;line-height:1.5;margin-bottom:12px">'+esc(g.description)+'</p>':'')
+    +actionBtn
+    +'<div style="margin-top:14px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Members</div><div>'+memberChips+'</div>'
+    +(n>12?'<div style="font-size:12px;color:var(--muted)">+'+(n-12)+' more</div>':'')+'</div></div>'
+    +'<div id="group-posts"></div>'
+    +(isMember?'<button class="btn" style="margin-top:4px" onclick="openGroupPostModal()">＋ Post a video to this group</button>':'');
+}
+async function joinGroup(){
+  if(!user){openAuth();return}
+  const ok=await ensureAgeVerified();
+  if(!ok)return;
+  const {error}=await sb.from('pulse_group_members').insert({group_id:activeGroup,user_id:user.id,role:'member'});
+  if(error){alert(error.message);return}
+  openGroup(activeGroup);
+}
+async function leaveGroup(){
+  if(!confirm('Leave this group?'))return;
+  const {error}=await sb.from('pulse_group_members').delete().eq('group_id',activeGroup).eq('user_id',user.id);
+  if(error){alert(error.message);return}
+  openGroup(activeGroup);
+}
+async function removeGroupMember(uid){
+  if(!confirm('Remove this person from the group?'))return;
+  const {error}=await sb.from('pulse_group_members').delete().eq('group_id',activeGroup).eq('user_id',uid);
+  if(error){alert(error.message);return}
+  openGroup(activeGroup);
+}
+function openGroupPostModal(){
+  groupPostTarget=activeGroup;
+  setPostType('video');
+  document.querySelector('#post-modal h2').textContent='Post to '+activeGroupInfo.group.name+' 🤟';
+  document.getElementById('post-modal').classList.add('open');
+}
+async function loadGroupPosts(){
+  const el=document.getElementById('group-posts');
+  if(!el)return;
+  el.innerHTML='<div class="empty">Loading posts…</div>';
+  const {data:posts}=await sb.from('pulse_group_posts').select('*').eq('group_id',activeGroup).order('created_at',{ascending:false}).limit(30);
+  if(!posts||!posts.length){el.innerHTML='<div class="empty">No posts in this group yet. Be the first! 🤟</div>';return}
+  const uids=[...new Set(posts.map(p=>p.user_id))];
+  let pmap={};
+  if(uids.length){
+    const {data:profs}=await sb.from('pulse_profiles').select('id,username,display_name,avatar_url').in('id',uids);
+    (profs||[]).forEach(p=>pmap[p.id]=p);
+  }
+  el.innerHTML='<div style="font-size:15px;font-weight:800;margin:8px 0 12px">Group posts</div>'+posts.map(p=>{
+    const prof=pmap[p.user_id]||{};
+    const track=p.captions_vtt?'<track kind="captions" label="English captions" srclang="en" src="'+URL.createObjectURL(new Blob([p.captions_vtt],{type:'text/vtt'}))+'">':'';
+    return '<div class="post"><video src="'+esc(p.video_url)+'" controls playsinline preload="metadata">'+track+'</video>'
+    +'<div class="post-body"><div class="post-user">'+avatarHTML(prof,36)
+    +'<div><div class="uname">@'+esc(prof.username||'?')+'</div><div class="utime">'+new Date(p.created_at).toLocaleDateString()+'</div></div></div>'
+    +(p.caption?'<div class="caption">'+esc(p.caption)+'</div>':'')
+    +(user&&p.user_id===user.id?'<div style="margin-top:8px"><button onclick="deleteGroupPost(\''+p.id+'\')" style="background:none;border:0;color:var(--muted);font-size:12px;cursor:pointer">Delete</button></div>':'')
+    +'</div></div>';
+  }).join('');
+}
+async function deleteGroupPost(postId){
+  if(!confirm('Delete this post?'))return;
+  await sb.from('pulse_group_posts').delete().eq('id',postId);
+  loadGroupPosts();
+}
+
+// ---------- init ----------
+(async()=>{await refreshAuth();loadFeed()})();
+</script>
+<script>
+// In-app message bar replaces browser popup alerts (Rob's request, Oct 22, 2026)
+(function(){
+  var timer=null;
+  window.alert=function(msg){
+    var t=document.getElementById('dw-toast');
+    if(!t){return}
+    t.textContent=String(msg);
+    t.style.display='block';
+    clearTimeout(timer);
+    timer=setTimeout(function(){t.style.display='none'},5000);
+    t.onclick=function(){t.style.display='none';clearTimeout(timer)};
+  };
+})();
+</script>
+<div id="dw-toast" role="status"></div>
+<script>
+(async function(){
+  var box = document.getElementById('pulse-jobs-list');
+  if(!box || typeof sb === 'undefined') return;
+  function e2(s){ if(typeof esc === 'function') return esc(s); return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  async function loadJobs(withJoin){
+    var sel = withJoin ? 'id,title,location,created_at,employers(company_name)' : 'id,title,location,created_at';
+    return sb.from('jobs').select(sel).eq('status','open').order('created_at',{ascending:false}).limit(6);
+  }
+  try {
+    var q = await loadJobs(true);
+    if(q.error) q = await loadJobs(false);
+    if(q.error) throw q.error;
+    var rows = q.data || [];
+    if(!rows.length){ box.innerHTML = '<p style="color:var(--muted);font-size:14px">No open jobs right now — check back soon.</p>'; return; }
+    box.innerHTML = rows.map(function(j){
+      var co = (j.employers && j.employers.company_name) ? e2(j.employers.company_name) : '';
+      var loc = j.location ? e2(j.location) : '';
+      var sub = [co, loc].filter(Boolean).join(' · ');
+      return '<a href="job.html?id=' + j.id + '" style="display:block;background:#1e2547;border:1px solid #39406b;border-radius:12px;padding:12px 14px;margin-bottom:8px;color:#fff;text-decoration:none"><strong>' + e2(j.title) + '</strong>' + (sub ? '<div style="color:var(--muted);font-size:13px;margin-top:2px">' + sub + '</div>' : '') + '</a>';
+    }).join('');
+  } catch(e){
+    box.innerHTML = '<p style="color:var(--muted);font-size:14px">Jobs are on the board — <a href="index.html" style="color:#7cc4ff">browse DeafWork</a>.</p>';
+  }
+})();
+</script>
+
+<div id="live-overlay" style="display:none;position:fixed;inset:0;z-index:60;background:#0a1226;flex-direction:column">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(18,28,58,.98);border-bottom:1px solid var(--border)">
+    <strong style="font-size:16px">🎥 Deaf Pulse Live</strong>
+    <button onclick="closeLive()" style="background:#2a3358;color:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-weight:700;cursor:pointer">✕ Leave</button>
+  </div>
+  <iframe id="live-frame" allow="camera; microphone; fullscreen; display-capture; autoplay" style="flex:1;width:100%;border:0" title="Deaf Pulse Live Hangout"></iframe>
+</div>
+<script>
+var LIVE_ROOM='https://meet.jit.si/DeafPulseHangout#config.startWithAudioMuted=true&config.prejoinPageEnabled=false';
+function openLive(){var o=document.getElementById('live-overlay');var f=document.getElementById('live-frame');if(!f.src)f.src=LIVE_ROOM;o.style.display='flex';}
+function closeLive(){var o=document.getElementById('live-overlay');var f=document.getElementById('live-frame');o.style.display='none';f.src='about:blank';setTimeout(function(){f.removeAttribute('src')},50);}
+</script>
+</body>
+</html>

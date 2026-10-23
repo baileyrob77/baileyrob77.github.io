@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get New Deaf Jobs Weekly — DeafWork</title>
+<meta name="description" content="New Deaf-friendly job listings in your inbox every week. Free. No phone calls, ever.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f7ff; color: #0b3d62; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .card { background: #fff; border-radius: 16px; padding: 40px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 4px 24px rgba(11,61,98,.08); }
+  .card h1 { font-size: 26px; margin-bottom: 8px; }
+  .card p { color: #4a6a82; font-size: 15px; margin-bottom: 24px; line-height: 1.5; }
+  input[type=email] { width: 100%; padding: 14px 16px; font-size: 16px; border: 2px solid #d6e6f5; border-radius: 10px; margin-bottom: 12px; }
+  input[type=email]:focus { outline: none; border-color: #0b3d62; }
+  button { width: 100%; padding: 14px; font-size: 16px; font-weight: 700; background: #0b3d62; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: default; }
+  .msg { margin-top: 16px; font-size: 14px; min-height: 20px; }
+  .msg.ok { color: #1a7a3a; }
+  .msg.err { color: #c0392b; }
+  .back { display: inline-block; margin-top: 24px; font-size: 14px; color: #4a6a82; text-decoration: none; }
+  .tiny { margin-top: 16px; font-size: 12px; color: #8aa0b4; }
+</style>
+<!-- Microsoft Clarity (free analytics) — STAGED Oct 22, 2026. Project ID placeholder: Rob creates the free Clarity project, Oracle swaps the ID, then this ships on Rob's deploy word. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+</head>
+<body>
+  <div class="card">
+    <h1>🤟 New Deaf Jobs, Weekly</h1>
+    <p>Fresh Deaf-friendly job listings in your inbox every week. Free forever. Unsubscribe anytime.</p>
+    <form id="nl-form">
+      <input type="email" id="nl-email" placeholder="you@example.com" required aria-label="Email address">
+      <button type="submit" id="nl-btn">Sign me up</button>
+    </form>
+    <div class="msg" id="nl-msg" role="status"></div>
+    <p class="tiny">No spam, no phone calls — just jobs.</p>
+    <a class="back" href="/">← Back to DeafWork</a>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    var sb = window.supabase.createClient(
+      "https://vdxncfcgtguzmsncjovl.supabase.co",
+      "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap"
+    );
+    document.getElementById("nl-form").addEventListener("submit", async function(e){
+      e.preventDefault();
+      var email = document.getElementById("nl-email").value.trim().toLowerCase();
+      var msg = document.getElementById("nl-msg");
+      var btn = document.getElementById("nl-btn");
+      btn.disabled = true; btn.textContent = "Signing up…";
+      msg.className = "msg"; msg.textContent = "";
+      try {
+        var r = await sb.from("newsletter_subscribers").insert({ email: email });
+        if (r.error) throw r.error;
+        msg.className = "msg ok";
+        msg.textContent = "You're in! Watch your inbox every week. 🤟";
+        document.getElementById("nl-email").value = "";
+      } catch (err) {
+        msg.className = "msg err";
+        msg.textContent = (err.code === "23505")
+          ? "That email is already signed up."
+          : "Something went wrong — please try again.";
+      }
+      btn.disabled = false; btn.textContent = "Sign me up";
+    });
+  </script>
+<div style="text-align:center;padding:14px;font-size:14px;font-family:sans-serif"><a href="deafwork-privacy.html">Privacy</a> · <a href="deafwork-terms.html">Terms</a> · <a href="deafpulse.html">🤟 Deaf Pulse</a></div></body>
+</html>

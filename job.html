@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Jobs — DeafWork</title>
+<meta name="description" content="Deaf and ASL-friendly job listings. Real jobs from Deaf-friendly employers.">
+<link id="canonical" rel="canonical" href="https://deafwork.netlify.app/job.html">
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0b3d62;background:#f0f6fb}
+body{margin:0;padding:0}
+header{background:#0b3d62;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+header a{color:#fff;text-decoration:none;font-weight:700}
+header .tag{font-size:13px;opacity:.85;font-weight:400}
+main{max-width:760px;margin:0 auto;padding:32px 20px 64px}
+.card{background:#fff;border:1px solid #d3e2ed;border-radius:16px;padding:28px;box-shadow:0 4px 16px #0b3d6211}
+.badge{display:inline-block;background:#e8f4fd;color:#0b3d62;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin:0 6px 6px 0}
+.badge.remote{background:#d9f2e4;color:#0d6b3f}
+h1{margin:0 0 6px;font-size:28px}
+.company{font-size:17px;font-weight:600;color:#2c5a7c;margin-bottom:4px}
+.meta{color:#5a7a92;font-size:14px;margin-bottom:18px}
+.desc{line-height:1.7;white-space:pre-wrap;margin:18px 0}
+.pay{font-size:20px;font-weight:800;color:#0b3d62;margin:14px 0}
+.apply{display:inline-block;background:#e8a317;color:#3d2c00;font-weight:800;text-decoration:none;padding:14px 32px;border-radius:12px;margin-top:16px}
+.apply:hover{filter:brightness(1.05)}
+.msgbtn{display:inline-block;background:#fff;color:#0b3d62;font-weight:800;border:2px solid #0b3d62;padding:12px 28px;border-radius:12px;margin:16px 0 0 12px;cursor:pointer;font-size:16px}
+.msgbtn:hover{background:#e8f4fd}
+/* message-employer modal */
+.modal-back{position:fixed;inset:0;background:rgba(11,61,98,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal{background:#fff;border-radius:16px;max-width:520px;width:100%;padding:28px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.modal h2{margin:0 0 6px;font-size:22px;color:#0b3d62}
+.modal p.sub{color:#5a7a92;font-size:14px;margin:0 0 18px}
+.modal label{display:block;font-weight:700;font-size:14px;color:#0b3d62;margin:12px 0 4px}
+.modal input,.modal textarea{width:100%;box-sizing:border-box;border:1px solid #c9dcea;border-radius:10px;padding:12px;font-size:15px;font-family:inherit}
+.modal textarea{min-height:120px;resize:vertical}
+.modal .row{display:flex;gap:12px;margin-top:20px}
+.modal .send{flex:1;background:#e8a317;color:#3d2c00;font-weight:800;border:none;border-radius:12px;padding:14px;font-size:16px;cursor:pointer}
+.modal .cancel{flex:1;background:#f0f6fb;color:#0b3d62;font-weight:700;border:none;border-radius:12px;padding:14px;font-size:16px;cursor:pointer}
+.modal .sent{text-align:center;padding:24px 0;color:#0d6b3f;font-weight:700;font-size:17px}
+.joblink{display:block;background:#fff;border:1px solid #d3e2ed;border-radius:12px;padding:16px 20px;margin-bottom:12px;text-decoration:none;color:#0b3d62}
+.joblink:hover{border-color:#0b3d62}
+.joblink .t{font-weight:700;font-size:16px}
+.joblink .s{font-size:13px;color:#5a7a92;margin-top:4px}
+.loading,.error{text-align:center;color:#5a7a92;padding:60px 20px}
+footer{text-align:center;color:#7a94a8;font-size:13px;padding:32px}
+</style>
+<!-- Microsoft Clarity (free analytics) — STAGED Oct 22, 2026. Project ID placeholder: Rob creates the free Clarity project, Oracle swaps the ID, then this ships on Rob's deploy word. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+</head>
+<body>
+<header>
+  <a href="https://deafwork.netlify.app/">🤟 DeafWork</a>
+  <span class="tag">The job board built for the Deaf community</span>
+</header>
+<main id="app"><div class="loading">Loading…</div></main>
+<footer>DeafWork — connecting Deaf, Hard-of-Hearing, and DeafBlind talent with employers who value them.<br><span style="font-size: 0.9em;"><a href="https://www.instagram.com/DeafWork2026" target="_blank" rel="noopener">📸 Instagram</a> · <a href="https://www.facebook.com/share/1Ek4zL2iFy/" target="_blank" rel="noopener">📘 Facebook</a> · <a href="deafwork-privacy.html">Privacy</a> · <a href="deafwork-terms.html">Terms</a> · <a href="deafpulse.html">🤟 Deaf Pulse</a> · <a href="about.html">About</a> · <a href="about.html#support">Support</a></span></footer>
+
+<!-- Hidden static form so Netlify detects it at deploy time.
+     The visible modal form below POSTs with the same form name. -->
+<form name="contact-employer" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="name">
+  <input type="email" name="email">
+  <input type="text" name="job_title">
+  <input type="text" name="company">
+  <textarea name="message"></textarea>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// === CONFIG — fill in before deploy ===
+// SUPABASE_URL is public (already in the live bundle).
+// SUPABASE_ANON_KEY: the publishable anon key — copy it from the live site's
+// dist/index-DUHpnroC.js bundle (same key the main app uses). It is a
+// publishable client key, safe to ship in this public page.
+var SUPABASE_URL = "https://vdxncfcgtguzmsncjovl.supabase.co";
+var SUPABASE_ANON_KEY = "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap";
+
+var SITE = "https://deafwork.netlify.app";
+var app = document.getElementById("app");
+var params = new URLSearchParams(location.search);
+var jobId = params.get("id");
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});}
+function fmtPay(min,max){
+  if(min==null&&max==null)return "";
+  var unit=(Math.max(min||0,max||0)>500)?"/yr":"/hr";
+  function f(n){return "$"+Number(n).toLocaleString("en-US");}
+  if(min&&max&&min!==max)return f(min)+" – "+f(max)+unit;
+  return f(min||max)+unit;
+}
+// Mirror of the main site's convention: amounts over $500 are annual.
+function salaryUnit(min,max){return (Math.max(min||0,max||0)>500)?"YEAR":"HOUR";}
+
+function injectSchema(obj){
+  var s=document.createElement("script");
+  s.type="application/ld+json";
+  s.textContent=JSON.stringify(obj);
+  document.head.appendChild(s);
+}
+
+async function main(){
+  if(!window.supabase||SUPABASE_ANON_KEY==="PASTE_ANON_KEY_HERE"){
+    app.innerHTML='<div class="error">This page is being set up — check back soon.</div>';
+    return;
+  }
+  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+  if(!jobId){return renderDirectory(sb);}
+
+  // --- Detail mode: one job, one JobPosting block (Google for Jobs) ---
+  var r=await sb.from("jobs").select("*, employers(company_name, website)").eq("id",jobId).maybeSingle();
+  var job=r.data;
+  if(!job||job.status!=="open"){
+    document.querySelector('meta[name="robots"]')||document.head.insertAdjacentHTML("beforeend",'<meta name="robots" content="noindex">');
+    app.innerHTML='<div class="error">This job is no longer available.<br><br><a href="'+SITE+'/job.html">Browse open jobs</a></div>';
+    return;
+  }
+  var emp=job.employers||{};
+  var company=emp.company_name||"Deaf-friendly employer";
+  var datePosted=new Date(job.created_at).toISOString().slice(0,10);
+  var validThrough=new Date(new Date(job.created_at).getTime()+90*864e5).toISOString().slice(0,10);
+  var pageUrl=SITE+"/job.html?id="+job.id;
+
+  document.getElementById("page-title").textContent=job.title+" at "+company+" — DeafWork";
+  document.getElementById("canonical").href=pageUrl;
+
+  var badges=[];
+  if(job.remote)badges.push('<span class="badge remote">Remote</span>');
+  if(job.asl_support)badges.push('<span class="badge">ASL-friendly</span>');
+  if(job.no_phone_application)badges.push('<span class="badge">No phone required</span>');
+  if(job.text_first)badges.push('<span class="badge">Text-first</span>');
+
+  app.innerHTML=
+    '<div class="card">'+
+    '<h1>'+esc(job.title)+'</h1>'+
+    '<div class="company">'+esc(company)+'</div>'+
+    '<div class="meta">'+esc(job.location||(job.remote?"Remote":""))+' · Posted '+esc(datePosted)+'</div>'+
+    '<div>'+badges.join("")+'</div>'+
+    (fmtPay(job.pay_min,job.pay_max)?'<div class="pay">'+esc(fmtPay(job.pay_min,job.pay_max))+'</div>':"")+
+    '<div class="desc">'+esc(job.description||"")+'</div>'+
+    (job.accommodations?'<div class="meta"><strong>Accommodations:</strong> '+esc(job.accommodations)+'</div>':"")+
+    '<a class="apply" href="'+SITE+'/">Apply on DeafWork</a>'+
+    '<button class="msgbtn" id="msgbtn">✉️ Message this employer</button>'+
+    '<div class="meta" style="margin-top:12px">Save and apply with your free DeafWork account. No phone calls needed — send a message through DeafWork.</div>'+
+    '<div style="margin-top:18px;text-align:center"><a id="reportlink" href="#" style="font-size:13px;color:#7a94a8">🚩 Report this listing</a></div>'+
+    '</div>';
+  document.getElementById("msgbtn").addEventListener("click",function(){openMsgModal(job.title,company);});
+  document.getElementById("reportlink").href="mailto:DeafWork2026@gmail.com?subject="+
+    encodeURIComponent("Listing report: "+job.title+" ("+job.id+")")+
+    "&body="+encodeURIComponent("I want to report a problem with this listing:\n\nTitle: "+job.title+"\nCompany: "+company+"\nLink: "+pageUrl+"\n\nWhat's wrong:\n");
+
+  // JobPosting structured data — must mirror the visible content above.
+  var posting={
+    "@context":"https://schema.org",
+    "@type":"JobPosting",
+    "title":job.title,
+    "description":job.description||job.title,
+    "identifier":{"@type":"PropertyValue","name":"DeafWork","value":job.id},
+    "datePosted":datePosted,
+    "validThrough":validThrough,
+    "hiringOrganization":{
+      "@type":"Organization",
+      "name":company,
+      "sameAs":emp.website||SITE
+    },
+    "url":pageUrl
+  };
+  if(job.remote){
+    posting.jobLocationType="TELECOMMUTE";
+  }else if(job.location){
+    posting.jobLocation={"@type":"Place","address":{"@type":"PostalAddress","addressLocality":job.location}};
+  }
+  if(job.pay_min!=null||job.pay_max!=null){
+    posting.baseSalary={
+      "@type":"MonetaryAmount","currency":"USD",
+      "value":{"@type":"QuantitativeValue",
+        "unitText":salaryUnit(job.pay_min,job.pay_max)}
+    };
+    if(job.pay_min!=null)posting.baseSalary.value.minValue=Number(job.pay_min);
+    if(job.pay_max!=null)posting.baseSalary.value.maxValue=Number(job.pay_max);
+  }
+  injectSchema(posting);
+}
+
+// --- Message-this-employer modal (Netlify Forms; Rob relays to the employer) ---
+function openMsgModal(jobTitle, company){
+  var back=document.createElement("div");
+  back.className="modal-back";
+  back.innerHTML=
+    '<div class="modal" role="dialog" aria-label="Message this employer">'+
+    '<h2>Message this employer</h2>'+
+    '<p class="sub">About: <strong>'+esc(jobTitle)+'</strong> at '+esc(company)+'<br>'+
+    'Your message goes to DeafWork, and we pass it to the employer — no phone calls needed.</p>'+
+    '<form id="msgform" name="contact-employer" method="POST" data-netlify="true" netlify-honeypot="bot-field">'+
+    '<input type="hidden" name="form-name" value="contact-employer">'+
+    '<input type="hidden" name="job_title" value="'+esc(jobTitle)+'">'+
+    '<input type="hidden" name="company" value="'+esc(company)+'">'+
+    '<p hidden><label>Don\'t fill this out: <input name="bot-field"></label></p>'+
+    '<label for="m-name">Your name</label>'+
+    '<input id="m-name" name="name" type="text" required autocomplete="name">'+
+    '<label for="m-email">Your email</label>'+
+    '<input id="m-email" name="email" type="email" required autocomplete="email">'+
+    '<label for="m-msg">Your message</label>'+
+    '<textarea id="m-msg" name="message" required placeholder="Hi, I\'m interested in this role…"></textarea>'+
+    '<div class="row"><button type="submit" class="send">Send message</button>'+
+    '<button type="button" class="cancel" id="msgcancel">Cancel</button></div>'+
+    '</form></div>';
+  document.body.appendChild(back);
+  document.getElementById("msgcancel").addEventListener("click",function(){document.body.removeChild(back);});
+  back.addEventListener("click",function(e){if(e.target===back)document.body.removeChild(back);});
+  document.getElementById("msgform").addEventListener("submit",function(e){
+    e.preventDefault();
+    var form=e.target;
+    fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},
+      body:new URLSearchParams(new FormData(form)).toString()})
+    .then(function(){
+      back.querySelector(".modal").innerHTML='<div class="sent">✅ Message sent!<br><span style="font-weight:400;font-size:15px;color:#5a7a92">The employer will reply to your email.</span></div>';
+    })
+    .catch(function(){
+      back.querySelector(".modal").innerHTML='<div class="sent" style="color:#a33">Something went wrong — please try again.</div>';
+    });
+  });
+}
+
+async function renderDirectory(sb){  // --- Directory mode: crawlable list so Google discovers every job URL ---
+  document.getElementById("page-title").textContent="Deaf-friendly jobs — DeafWork";
+  var r=await sb.from("jobs").select("id,title,location,remote,created_at,employers(company_name)").eq("status","open").order("created_at",{ascending:false});
+  var jobs=r.data||[];
+  var items=jobs.map(function(j,i){
+    var company=(j.employers&&j.employers.company_name)||"Deaf-friendly employer";
+    return '<a class="joblink" href="'+SITE+'/job.html?id='+j.id+'">'+
+      '<div class="t">'+esc(j.title)+'</div>'+
+      '<div class="s">'+esc(company)+' · '+esc(j.location||(j.remote?"Remote":""))+'</div></a>';
+  }).join("");
+  app.innerHTML='<h1>Deaf-friendly jobs</h1><p class="meta">'+jobs.length+' open listings</p>'+items+
+    '<p class="meta">Employers: <a href="'+SITE+'/employers.html">post a job for $49</a> — first 10 post free.</p>';
+  injectSchema({
+    "@context":"https://schema.org","@type":"ItemList",
+    "name":"Deaf-friendly job listings",
+    "itemListElement":jobs.map(function(j,i){
+      return {"@type":"ListItem","position":i+1,"url":SITE+"/job.html?id="+j.id,"name":j.title};
+    })
+  });
+}
+
+main();
+</script>
+</body>
+</html>

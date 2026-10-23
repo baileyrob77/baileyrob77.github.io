@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DeafWork Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>*,*::before,*::after{box-sizing:border-box}
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0b3d62;background:#f0f6fb}
+body{margin:0;padding:24px;max-width:1000px;margin:auto}
+h1{font-size:28px}
+.card{background:#fff;border:1px solid #d3e2ed;border-radius:14px;padding:20px;margin-bottom:16px}
+button{cursor:pointer;border:0;border-radius:10px;padding:10px 16px;font-weight:700}
+.primary{background:#0b3d62;color:#fff}
+.secondary{background:#fff;border:1px solid #cfdee9;color:#0b3d62}
+.danger{background:#fff;border:1px solid #e5a0a0;color:#a02020}
+input,textarea,select{width:100%;border:1px solid #ccdae7;border-radius:8px;padding:10px;margin:4px 0 12px;box-sizing:border-box;font:inherit}
+label{font-weight:700;font-size:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid #e7f0f8}
+th{color:#59809a;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.hidden{display:none}
+#loginCard{max-width:400px;margin:60px auto}
+.notice{background:#0b3d62;color:#fff;padding:12px;border-radius:10px;margin-bottom:16px}
+</style>
+<!-- Microsoft Clarity (free analytics) — STAGED Oct 22, 2026. Project ID placeholder: Rob creates the free Clarity project, Oracle swaps the ID, then this ships on Rob's deploy word. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+</head>
+<body>
+<div id="loginCard" class="card">
+  <h1>🤟 DeafWork Admin</h1>
+  <p>Sign in to manage job listings.</p>
+  <label>Email<input type="email" id="email"/></label>
+  <label>Password<input type="password" id="password"/></label>
+  <button class="primary" id="loginBtn" style="width:100%">Sign in</button>
+  <p style="text-align:center;margin:8px 0 0"><a href="#" id="forgotLink" style="font-size:14px">Forgot password?</a></p>
+  <p id="loginMsg" style="color:#a02020"></p>
+</div>
+
+<div id="app" class="hidden">
+  <h1>🤟 DeafWork Admin</h1>
+  <div id="notice" class="notice hidden"></div>
+  <div class="card">
+    <h2 id="formTitle">Add Job</h2>
+    <input type="hidden" id="jobId"/>
+    <div class="row">
+      <div><label>Title*<input id="f_title" required/></label></div>
+      <div><label>Company*<input id="f_company" list="employers" required/><datalist id="employers"></datalist></label></div>
+    </div>
+    <div class="row">
+      <div><label>Location<input id="f_location" placeholder="Remote — U.S."/></label></div>
+      <div><label>Application URL<input id="f_url" placeholder="https://..."/></label></div>
+    </div>
+    <div class="row">
+      <div><label>Pay min ($/hr)<input id="f_paymin" type="number"/></label></div>
+      <div><label>Pay max ($/hr)<input id="f_paymax" type="number"/></label></div>
+    </div>
+    <label>Description<textarea id="f_desc" rows="3"></textarea></label>
+    <label>Accommodations<textarea id="f_accom" rows="2"></textarea></label>
+    <div class="row">
+      <div><label>Expires on<input id="f_expires" type="date"/></label></div>
+      <div><label>Status<select id="f_status"><option value="open">Open</option><option value="closed">Closed</option></select></label></div>
+    </div>
+    <div>
+      <label style="display:inline;margin-right:16px"><input type="checkbox" id="f_remote" style="width:auto"/> Remote</label>
+      <label style="display:inline;margin-right:16px"><input type="checkbox" id="f_asl" style="width:auto"/> ASL support</label>
+      <label style="display:inline;margin-right:16px"><input type="checkbox" id="f_text" style="width:auto"/> Text-first</label>
+      <label style="display:inline"><input type="checkbox" id="f_nophone" style="width:auto"/> No-phone application</label>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px">
+      <button class="primary" id="saveBtn">Save job</button>
+      <button class="secondary hidden" id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>✅ Compliance Checker</h2>
+    <p>Screen a listing for discriminatory language, scam signals, and missing salary ranges before it goes live. Run it on <strong>every</strong> listing, every time.</p>
+    <a href="compliance-checker.html" class="secondary" style="text-decoration:none;display:inline-block">Open the checker →</a>
+  </div>
+
+  <div class="card">
+    <h2>All Jobs</h2>
+    <table><thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Expires</th><th></th></tr></thead>
+    <tbody id="jobRows"></tbody></table>
+  </div>
+  <button class="secondary" id="logoutBtn">Sign out</button>
+</div>
+
+<script>
+const supa = supabase.createClient(
+  "https://vdxncfcgtguzmsncjovl.supabase.co",
+  "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap"
+);
+const $ = id => document.getElementById(id);
+let employers = {};
+
+async function init() {
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) showApp(); else {
+    $("loginCard").classList.remove("hidden");
+    $("app").classList.add("hidden");
+  }
+}
+$("loginBtn").onclick = async () => {
+  const { error } = await supa.auth.signInWithPassword({ email: $("email").value, password: $("password").value });
+  if (error) $("loginMsg").textContent = error.message; else showApp();
+};
+$("logoutBtn").onclick = async () => { await supa.auth.signOut(); location.reload(); };
+$("forgotLink").onclick = async (e) => {
+  e.preventDefault();
+  const email = $("email").value.trim();
+  if (!email) { $("loginMsg").textContent = "Enter your email above first, then click Forgot password."; return; }
+  const { error } = await supa.auth.resetPasswordForEmail(email, { redirectTo: location.origin + "/admin.html" });
+  $("loginMsg").style.color = error ? "#a02020" : "#1a7a1a";
+  $("loginMsg").textContent = error ? error.message : "Password reset email sent — check your inbox.";
+};
+
+async function showApp() {
+  $("loginCard").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  await loadEmployers();
+  await loadJobs();
+}
+async function loadEmployers() {
+  const { data } = await supa.from("employers").select("id,company_name").order("company_name");
+  employers = {};
+  $("employers").innerHTML = "";
+  (data || []).forEach(e => {
+    employers[e.company_name] = e.id;
+    const o = document.createElement("option"); o.value = e.company_name;
+    $("employers").appendChild(o);
+  });
+}
+async function loadJobs() {
+  const { data } = await supa.from("jobs").select("id,title,location,status,expires_at,employers(company_name)").order("created_at", { ascending: false });
+  $("jobRows").innerHTML = (data || []).map(j => `<tr>
+    <td>${esc(j.title)}</td><td>${esc(j.employers?.company_name || "")}</td>
+    <td>${esc(j.status)}</td><td>${j.expires_at ? j.expires_at.slice(0,10) : "—"}</td>
+    <td><button class="secondary" onclick="editJob('${j.id}')">Edit</button>
+    <button class="danger" onclick="delJob('${j.id}')">Delete</button></td></tr>`).join("");
+}
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function note(t){ const n=$("notice"); n.textContent=t; n.classList.remove("hidden"); setTimeout(()=>n.classList.add("hidden"),4000); }
+
+async function getOrCreateEmployer(name) {
+  if (employers[name]) return employers[name];
+  const { data, error } = await supa.from("employers").insert({ company_name: name }).select("id").single();
+  if (error) { note("Employer error: " + error.message); return null; }
+  employers[name] = data.id;
+  return data.id;
+}
+
+$("saveBtn").onclick = async () => {
+  const title = $("f_title").value.trim(), company = $("f_company").value.trim();
+  if (!title || !company) { note("Title and company are required."); return; }
+  const employer_id = await getOrCreateEmployer(company);
+  if (!employer_id) return;
+  const job = {
+    title, employer_id,
+    location: $("f_location").value.trim() || null,
+    application_url: $("f_url").value.trim() || null,
+    pay_min: $("f_paymin").value ? Number($("f_paymin").value) : null,
+    pay_max: $("f_paymax").value ? Number($("f_paymax").value) : null,
+    description: $("f_desc").value.trim() || null,
+    accommodations: $("f_accom").value.trim() || null,
+    expires_at: $("f_expires").value ? new Date($("f_expires").value + "T23:59:59").toISOString() : null,
+    status: $("f_status").value,
+    remote: $("f_remote").checked,
+    asl_support: $("f_asl").checked,
+    text_first: $("f_text").checked,
+    no_phone_application: $("f_nophone").checked,
+  };
+  const id = $("jobId").value;
+  const { error } = id
+    ? await supa.from("jobs").update(job).eq("id", id)
+    : await supa.from("jobs").insert(job);
+  if (error) note("Error: " + error.message);
+  else { note(id ? "Job updated." : "Job added."); resetForm(); await loadJobs(); }
+};
+
+window.editJob = async (id) => {
+  const { data: j } = await supa.from("jobs").select("*,employers(company_name)").eq("id", id).single();
+  if (!j) return;
+  $("jobId").value = j.id;
+  $("f_title").value = j.title || ""; $("f_company").value = j.employers?.company_name || "";
+  $("f_location").value = j.location || ""; $("f_url").value = j.application_url || "";
+  $("f_paymin").value = j.pay_min || ""; $("f_paymax").value = j.pay_max || "";
+  $("f_desc").value = j.description || ""; $("f_accom").value = j.accommodations || "";
+  $("f_expires").value = j.expires_at ? j.expires_at.slice(0,10) : "";
+  $("f_status").value = j.status || "open";
+  $("f_remote").checked = !!j.remote; $("f_asl").checked = !!j.asl_support;
+  $("f_text").checked = !!j.text_first; $("f_nophone").checked = !!j.no_phone_application;
+  $("formTitle").textContent = "Edit Job";
+  $("cancelBtn").classList.remove("hidden");
+  window.scrollTo(0,0);
+};
+window.delJob = async (id) => {
+  if (!confirm("Delete this job?")) return;
+  const { error } = await supa.from("jobs").delete().eq("id", id);
+  if (error) note("Error: " + error.message); else { note("Job deleted."); await loadJobs(); }
+};
+function resetForm() {
+  ["jobId","f_title","f_company","f_location","f_url","f_paymin","f_paymax","f_desc","f_accom","f_expires"].forEach(i => $(i).value = "");
+  ["f_remote","f_asl","f_text","f_nophone"].forEach(i => $(i).checked = false);
+  $("f_status").value = "open";
+  $("formTitle").textContent = "Add Job";
+  $("cancelBtn").classList.add("hidden");
+}
+$("cancelBtn").onclick = resetForm;
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Payment Received — Submit Your Job | DeafWork</title>
+<meta name="description" content="Thanks for your DeafWork payment! Submit your job details and we'll get your listing live within 24 hours."/>
+<meta name="robots" content="noindex"/>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0b3d62;background:#f0f6fb}
+body{margin:0;padding:0}
+header{background:#0b3d62;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+header a{color:#fff;text-decoration:none;font-weight:700}
+.hero{text-align:center;padding:48px 24px 24px}
+.hero .check{font-size:56px;margin-bottom:8px}
+.hero h1{font-size:32px;margin:0 0 12px}
+.hero p{font-size:17px;color:#4a6a82;max-width:560px;margin:0 auto}
+.form-section{max-width:640px;margin:32px auto;padding:0 24px 60px}
+.card{background:#fff;border:1px solid #d3e2ed;border-radius:14px;padding:28px}
+.card h2{margin-top:0}
+label{font-weight:700;font-size:14px;display:block}
+input,textarea,select{width:100%;border:1px solid #ccdae7;border-radius:8px;padding:12px;margin:4px 0 16px;box-sizing:border-box;font:inherit}
+textarea{resize:vertical}
+.hint{font-size:13px;color:#7a94a8;font-weight:400;margin-top:-12px;margin-bottom:16px}
+button,.btn{cursor:pointer;border:0;border-radius:10px;padding:14px 28px;font-weight:700;font-size:16px;text-decoration:none;display:inline-block;background:#0b3d62;color:#fff;width:100%;box-sizing:border-box}
+button:hover{background:#0e4d7c}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+footer{text-align:center;padding:32px;color:#7a94a8;font-size:14px}
+.note{background:#e8f5e9;border-left:4px solid #2a9d5a;border-radius:8px;padding:16px 20px;margin-bottom:24px;color:#1b5e20;font-size:15px}
+</style>
+<!-- Microsoft Clarity (free analytics) — STAGED Oct 22, 2026. Project ID placeholder: Rob creates the free Clarity project, Oracle swaps the ID, then this ships on Rob's deploy word. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+</head>
+<body>
+<header>
+  <a href="/">🤟 DeafWork</a>
+  <a href="/employers.html">← Employers</a>
+</header>
+
+<div class="hero">
+  <div class="check">✅</div>
+  <h1>Payment Received!</h1>
+  <p>Thanks for posting on DeafWork. Fill out your job details below and we'll get your listing live within <strong>24 hours</strong>.</p>
+</div>
+
+<div class="form-section">
+  <div class="note">
+    <strong>What happens next:</strong> We review every listing for quality, then publish it to the job board. You'll get a confirmation email once it's live.
+  </div>
+  <div class="card">
+    <h2>Your Job Details</h2>
+    <form id="intake-form" action="mailto:DeafWork2026@gmail.com" method="post" enctype="text/plain">
+      <label>Which plan did you purchase?
+        <select name="plan" required>
+          <option value="">— Select —</option>
+          <option>Standard — $49 (30 days)</option>
+          <option>Featured — $99 (30 days)</option>
+          <option>Monthly — $149/mo</option>
+        </select>
+      </label>
+      <div class="row">
+        <label>Your Name
+          <input name="contact_name" required placeholder="Jane Smith"/>
+        </label>
+        <label>Work Email
+          <input name="contact_email" type="email" required placeholder="jane@company.com"/>
+        </label>
+      </div>
+      <label>Company Name
+        <input name="company" required placeholder="Acme Corp"/>
+      </label>
+      <label>Job Title
+        <input name="job_title" required placeholder="e.g., ASL Interpreter, Customer Support Rep"/>
+      </label>
+      <div class="row">
+        <label>Location
+          <input name="location" required placeholder="e.g., Remote (US) or Portland, OR"/>
+        </label>
+        <label>Job Type
+          <select name="job_type">
+            <option>Full-time</option>
+            <option>Part-time</option>
+            <option>Contract</option>
+            <option>Temporary</option>
+            <option>Internship</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Salary / Pay Range
+          <input name="salary" required placeholder="e.g., $25–$30/hr or $60k–$75k/yr"/>
+          <div class="hint">Required — pay transparency is the law in 16 states + DC and for most remote roles.</div>
+        </label>
+        <label>Remote?
+          <select name="remote">
+            <option>Yes — fully remote</option>
+            <option>Hybrid</option>
+            <option>No — on-site only</option>
+          </select>
+        </label>
+      </div>
+      <label>Job Description
+        <textarea name="description" rows="6" required placeholder="What will this person do? What qualifications do you need? What makes your workplace Deaf-friendly?"></textarea>
+      </label>
+      <label>How Should Candidates Apply?
+        <input name="apply_url" required placeholder="Application URL or email address"/>
+        <div class="hint">A direct link to the job posting on your site works best.</div>
+      </label>
+      <label>Anything else we should know? (optional)
+        <textarea name="notes" rows="3" placeholder="ASL-friendly workplace details, accommodations you offer, etc."></textarea>
+      </label>
+      <button type="submit">Submit Job for Review →</button>
+    </form>
+    <p style="font-size:13px;color:#7a94a8;text-align:center;margin-top:16px">Having trouble? Email your details directly to <strong>DeafWork2026@gmail.com</strong></p>
+  </div>
+</div>
+
+<footer>
+  <p>🤟 DeafWork — Jobs for the Deaf community, by the Deaf community.</p>
+
+  <p style="margin-top: 10px; font-size: 0.9em;"><a href="https://www.instagram.com/DeafWork2026" target="_blank" rel="noopener">📸 Instagram</a> · <a href="https://www.facebook.com/share/1Ek4zL2iFy/" target="_blank" rel="noopener">📘 Facebook</a> · <a href="deafwork-privacy.html">Privacy</a> · <a href="deafwork-terms.html">Terms</a> · <a href="deafpulse.html">🤟 Deaf Pulse</a> · <a href="about.html">About</a> · <a href="about.html#support">Support</a></p>
+</footer>
+
+<script>
+// Pre-fill plan from URL (?plan=featured etc.)
+(function(){
+  var p = new URLSearchParams(location.search).get('plan');
+  if(!p) return;
+  var map = {standard:0, featured:1, monthly:2};
+  var sel = document.querySelector('select[name=plan]');
+  if(sel && map[p.toLowerCase()] !== undefined){ sel.selectedIndex = map[p.toLowerCase()]+1; }
+})();
+</script>
+</body>
+</html>
