@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="page-title">Jobs — DeafWork</title>
+<title id="page-title">Jobs — DeafCanWork</title>
 <meta name="description" content="Deaf and ASL-friendly job listings. Real jobs from Deaf-friendly employers.">
 <link id="canonical" rel="canonical" href="/job.html">
 <style>
@@ -55,11 +55,11 @@ footer{text-align:center;color:#7a94a8;font-size:13px;padding:32px}
 </head>
 <body>
 <header>
-  <a href="/">🤟 DeafWork</a>
+  <a href="/">🤟 DeafCanWork</a>
   <span class="tag">The job board built for the Deaf community</span>
 </header>
 <main id="app"><div class="loading">Loading…</div></main>
-<footer>DeafWork — connecting Deaf, Hard-of-Hearing, and DeafBlind talent with employers who value them.<br><span style="font-size: 0.9em;"><a href="https://www.instagram.com/DeafWork2026" target="_blank" rel="noopener">📸 Instagram</a> · <a href="https://www.facebook.com/share/1Ek4zL2iFy/" target="_blank" rel="noopener">📘 Facebook</a> · <a href="deafwork-privacy.html">Privacy</a> · <a href="deafwork-terms.html">Terms</a> · <a href="deafpulse.html">🤟 Deaf Pulse</a> · <a href="about.html">About</a> · <a href="about.html#support">Support</a></span></footer>
+<footer>DeafCanWork — connecting Deaf, Hard-of-Hearing, and DeafBlind talent with employers who value them.<br><span style="font-size: 0.9em;"><a href="https://www.instagram.com/DeafWork2026" target="_blank" rel="noopener">📸 Instagram</a> · <a href="https://www.facebook.com/share/1Ek4zL2iFy/" target="_blank" rel="noopener">📘 Facebook</a> · <a href="deafwork-privacy.html">Privacy</a> · <a href="deafwork-terms.html">Terms</a> · <a href="deafpulse.html">🤟 Deaf Pulse</a> · <a href="about.html">About</a> · <a href="about.html#support">Support</a></span></footer>
 
 <!-- Hidden static form so Netlify detects it at deploy time.
      The visible modal form below POSTs with the same form name. -->
@@ -129,7 +129,7 @@ async function main(){
   var validThrough=new Date(new Date(job.created_at).getTime()+90*864e5).toISOString().slice(0,10);
   var pageUrl=location.origin+"/job.html?id="+job.id;
 
-  document.getElementById("page-title").textContent=job.title+" at "+company+" — DeafWork";
+  document.getElementById("page-title").textContent=job.title+" at "+company+" — DeafCanWork";
   document.getElementById("canonical").href=pageUrl;
 
   var badges=[];
@@ -146,7 +146,7 @@ async function main(){
   }else if(applyUrl&&applyUrl.indexOf("@")>-1){
     applyBtn='<a class="apply" href="mailto:'+esc(applyUrl)+'">Email your application</a>';
   }else{
-    applyBtn='<a class="apply" href="/">Find &amp; apply on DeafWork</a>';
+    applyBtn='<a class="apply" href="/">Find &amp; apply on DeafCanWork</a>';
   }
 
   app.innerHTML=
@@ -160,7 +160,7 @@ async function main(){
     (job.accommodations?'<div class="meta"><strong>Accommodations:</strong> '+esc(job.accommodations)+'</div>':"")+
     applyBtn+
     '<button class="msgbtn" id="msgbtn">✉️ Message this employer</button>'+
-    '<div class="meta" style="margin-top:12px">Apply with your free DeafWork account. No phone calls needed — send a message through DeafWork.</div>'+
+    '<div class="meta" style="margin-top:12px">Apply with your free DeafCanWork account. No phone calls needed — send a message through DeafCanWork.</div>'+
     '<div style="margin-top:18px;text-align:center"><a id="reportlink" href="#" style="font-size:13px;color:#7a94a8">🚩 Report this listing</a></div>'+
     '</div>';
   document.getElementById("msgbtn").addEventListener("click",function(){openMsgModal(job.title,company);});
@@ -174,7 +174,7 @@ async function main(){
     "@type":"JobPosting",
     "title":job.title,
     "description":job.description||job.title,
-    "identifier":{"@type":"PropertyValue","name":"DeafWork","value":job.id},
+    "identifier":{"@type":"PropertyValue","name":"DeafCanWork","value":job.id},
     "datePosted":datePosted,
     "validThrough":validThrough,
     "hiringOrganization":{
@@ -209,7 +209,7 @@ function openMsgModal(jobTitle, company){
     '<div class="modal" role="dialog" aria-label="Message this employer">'+
     '<h2>Message this employer</h2>'+
     '<p class="sub">About: <strong>'+esc(jobTitle)+'</strong> at '+esc(company)+'<br>'+
-    'Your message goes to DeafWork, and we pass it to the employer — no phone calls needed.</p>'+
+    'Your message goes to DeafCanWork, and we pass it to the employer — no phone calls needed.</p>'+
     '<form id="msgform" name="contact-employer" method="POST" data-netlify="true" netlify-honeypot="bot-field">'+
     '<input type="hidden" name="form-name" value="contact-employer">'+
     '<input type="hidden" name="job_title" value="'+esc(jobTitle)+'">'+
@@ -233,16 +233,16 @@ function openMsgModal(jobTitle, company){
     var d={name:document.getElementById("m-name").value.trim(),
            email:document.getElementById("m-email").value.trim(),
            msg:document.getElementById("m-msg").value.trim()};
-    // Failure path: never claim success. Offer a prefilled email to DeafWork
+    // Failure path: never claim success. Offer a prefilled email to DeafCanWork
     // with the visitor's message preserved, so nothing they typed is lost.
     function msgFail(){
-      var body="Hi DeafWork team,\n\nPlease pass this message to "+company+" about the job \""+jobTitle+"\".\n\nFrom: "+d.name+" ("+d.email+")\n\n"+d.msg;
+      var body="Hi DeafCanWork team,\n\nPlease pass this message to "+company+" about the job \""+jobTitle+"\".\n\nFrom: "+d.name+" ("+d.email+")\n\n"+d.msg;
       back.querySelector(".modal").innerHTML=
         '<div class="sent" style="color:#a33">That didn\'t send — please use the email option below.</div>'+
         '<p style="font-size:14px;color:#5a7a92">Your message is already filled into the email — just tap the button and press send:</p>'+
         '<p style="text-align:center"><a class="apply" href="mailto:DeafWork2026@gmail.com?subject='+
         encodeURIComponent("Message for "+company+": "+jobTitle)+
-        '&body='+encodeURIComponent(body)+'">📧 Email your message to DeafWork</a></p>'+
+        '&body='+encodeURIComponent(body)+'">📧 Email your message to DeafCanWork</a></p>'+
         '<p style="text-align:center"><button type="button" id="msgfailclose" style="background:#f0f6fb;color:#0b3d62;font-weight:700;border:none;border-radius:12px;padding:12px 24px;font-size:15px;cursor:pointer">Close</button></p>';
       document.getElementById("msgfailclose").addEventListener("click",function(){document.body.removeChild(back);});
     }
@@ -257,7 +257,7 @@ function openMsgModal(jobTitle, company){
 }
 
 async function renderDirectory(sb){  // --- Directory mode: crawlable list so Google discovers every job URL ---
-  document.getElementById("page-title").textContent="Deaf-friendly jobs — DeafWork";
+  document.getElementById("page-title").textContent="Deaf-friendly jobs — DeafCanWork";
   var r=await sb.from("jobs").select("id,title,location,remote,created_at,employers(company_name)").eq("status","open").order("created_at",{ascending:false});
   var jobs=r.data||[];
   var items=jobs.map(function(j,i){

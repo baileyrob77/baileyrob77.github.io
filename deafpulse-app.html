@@ -97,7 +97,7 @@ input:focus,textarea:focus{border-color:var(--p1)}
 <section id="tab-feed" class="tab active">
 <div id="pulse-hangout" style="margin-bottom:18px;background:linear-gradient(135deg,#1a3a8a,#101c38);border:1px solid #39406b;border-radius:14px;padding:16px"><h2 style="font-size:18px;margin:0 0 6px">🎥 Live Hangout</h2><p style="color:var(--muted);font-size:14px;margin:0 0 12px;line-height:1.5">The community room is always open — face to face, sign to sign. Right here inside Pulse — no other app. Sound starts off, cameras on.</p><button onclick="openLive()" style="background:#ffd166;color:#050507;font-weight:800;border:0;border-radius:12px;padding:12px 22px;font-size:15px;cursor:pointer">Join Live Hangout →</button></div>
 <div id="pulse-sign-day" style="margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-left:4px solid #ffd166;border-radius:14px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px"><h2 style="font-size:18px;margin:0">🤟 ASL Sign of the Day</h2><span id="sotd-date" style="color:var(--muted);font-size:13px"></span></div><div id="sotd-word" style="font-size:30px;font-weight:900;color:#ffd166;letter-spacing:.02em;margin:4px 0 8px"></div><p id="sotd-desc" style="font-size:14px;margin:0 0 8px;line-height:1.6"></p><p id="sotd-tip" style="color:var(--muted);font-size:13px;margin:0 0 10px;line-height:1.5"></p><p style="color:var(--muted);font-size:12px;margin:0">Signs verified against Lifeprint (Dr. Bill Vicars)</p></div>
-<div id="pulse-jobs" style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="font-size:18px;margin:0">💼 Latest Jobs from DeafWork</h2><a href="index.html" style="color:#7cc4ff;font-size:14px;text-decoration:none">See all jobs →</a></div><div id="pulse-jobs-list"><p style="color:var(--muted);font-size:14px">Loading jobs…</p></div></div>
+<div id="pulse-jobs" style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="font-size:18px;margin:0">💼 Latest Jobs from DeafCanWork</h2><a href="index.html" style="color:#7cc4ff;font-size:14px;text-decoration:none">See all jobs →</a></div><div id="pulse-jobs-list"><p style="color:var(--muted);font-size:14px">Loading jobs…</p></div></div>
 <div id="feed"></div>
 </section>
 
@@ -1490,7 +1490,7 @@ async function deleteGroupPost(postId){
       return '<a href="job.html?id=' + j.id + '" style="display:block;background:#1e2547;border:1px solid #39406b;border-radius:12px;padding:12px 14px;margin-bottom:8px;color:#fff;text-decoration:none"><strong>' + e2(j.title) + '</strong>' + (sub ? '<div style="color:var(--muted);font-size:13px;margin-top:2px">' + sub + '</div>' : '') + '</a>';
     }).join('');
   } catch(e){
-    box.innerHTML = '<p style="color:var(--muted);font-size:14px">Jobs are on the board — <a href="index.html" style="color:#7cc4ff">browse DeafWork</a>.</p>';
+    box.innerHTML = '<p style="color:var(--muted);font-size:14px">Jobs are on the board — <a href="index.html" style="color:#7cc4ff">browse DeafCanWork</a>.</p>';
   }
 })();
 </script>
