@@ -146,7 +146,10 @@ footer{text-align:center;padding:32px;color:#7a94a8;font-size:14px}
         <label class="plan selected"><input type="radio" name="plan" value="free" checked/>
           <div><strong>First listing — FREE for 30 days</strong><br/><span class="plandesc">Your listing goes live after review, free for 30 days.</span></div>
         </label>
-        <label class="plan"><input type="radio" name="plan" value="standard"/>
+                <label class="plan"><input type="radio" name="plan" value="monthly"/>
+          <div><strong>Monthly Subscription — $149/mo ⭐ RECOMMENDED</strong><br/><span class="plandesc">For employers who hire regularly: up to 10 active listings + 2 featured slots included. Cancel anytime.</span></div>
+        </label>
+<label class="plan"><input type="radio" name="plan" value="standard"/>
           <div><strong>Standard — $49</strong><br/><span class="plandesc">30-day listing, shown to all job seekers.</span></div>
         </label>
         <label class="plan"><input type="radio" name="plan" value="featured"/>
@@ -338,9 +341,10 @@ $("jobForm").addEventListener("submit", async (e) => {
     const planLinks = {
       standard: "https://buy.stripe.com/4gM7sM0020An37531c48003",
       featured: "https://buy.stripe.com/7sY3cw1460An7nl9pA48004",
+      monthly: "https://buy.stripe.com/00wdRa8wy0An2318lw48005",
     };
-    if (d.plan === "standard" || d.plan === "featured") {
-      const amt = d.plan === "standard" ? "49" : "99";
+    if (d.plan === "standard" || d.plan === "featured" || d.plan === "monthly") {
+      const amt = d.plan === "standard" ? "49" : d.plan === "featured" ? "99" : "149/mo";
       $("okHeading").textContent = "Thanks! Your listing is submitted and pending review.";
       $("payBtn").href = planLinks[d.plan];
       $("payBtn").textContent = "Pay $" + amt + " Now →";
