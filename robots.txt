@@ -4,4 +4,4 @@ Disallow: /admin.html
 Disallow: /deafwork-import.html
 Disallow: /compliance-checker.html
 
-Sitemap: https://deafwork.netlify.app/sitemap.xml
+Sitemap: https://deafcanwork.com/sitemap.xml
