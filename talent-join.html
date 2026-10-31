@@ -19,7 +19,7 @@ h1{margin:0 0 6px;font-size:29px}
 .note{background:#e8f4fd;border:1px solid #bcd9ee;border-radius:12px;padding:14px 18px;font-size:14.5px;line-height:1.6;margin:18px 0 22px}
 label{display:block;font-weight:700;font-size:15px;margin:18px 0 5px}
 .hint{font-weight:400;color:#5a7a92;font-size:13.5px;margin:2px 0 0}
-input[type=text],textarea{width:100%;box-sizing:border-box;border:1px solid #c9dcea;border-radius:10px;padding:12px 14px;font-size:16px;font-family:inherit}
+input[type=text],input[type=email],input[type=password],textarea{width:100%;box-sizing:border-box;border:1px solid #c9dcea;border-radius:10px;padding:12px 14px;font-size:16px;font-family:inherit}
 textarea{min-height:110px;resize:vertical}
 .check{display:flex;gap:12px;align-items:flex-start;background:#f4f9fd;border:1px solid #d3e2ed;border-radius:12px;padding:16px;margin-top:14px}
 .check input{width:22px;height:22px;margin-top:2px;flex:none}
@@ -32,7 +32,11 @@ textarea{min-height:110px;resize:vertical}
 .del{background:none;border:none;color:#a33;font-weight:700;font-size:14.5px;cursor:pointer;margin-top:20px;padding:8px 0;font-family:inherit}
 .ok{background:#d9f2e4;color:#0d6b3f;border-radius:12px;padding:15px 18px;font-weight:600;line-height:1.6;margin-top:20px}
 .err{background:#fdecec;border:1px solid #f2b8b8;color:#8a2323;border-radius:12px;padding:15px 18px;line-height:1.6;margin-top:20px}
-.bigbtn{display:inline-block;background:#0b3d62;color:#fff;font-weight:800;text-decoration:none;padding:14px 30px;border-radius:12px;margin-top:14px}
+.tabs{display:flex;gap:10px;margin-bottom:6px}
+.tab{flex:1;background:#eef5fb;color:#0b3d62;font-weight:800;border:2px solid #c9dcea;padding:13px;border-radius:12px;font-size:16px;cursor:pointer;font-family:inherit}
+.tab.on{background:#0b3d62;color:#fff;border-color:#0b3d62}
+.signout{background:none;border:none;color:#5a7a92;font-weight:700;font-size:14px;cursor:pointer;padding:6px 0;font-family:inherit;text-decoration:underline}
+.who{color:#5a7a92;font-size:14px;margin-top:16px}
 </style>
 <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
@@ -62,11 +66,53 @@ var SUPABASE_URL = "https://vdxncfcgtguzmsncjovl.supabase.co";
 var SUPABASE_ANON_KEY = "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap";
 var app = document.getElementById("app");
 var sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+var mode = "in"; // "in" = sign in, "up" = create account
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});}
 
-function formHTML(p){
+function authHTML(errText, okText){
+  return '<div class="card">' +
+  '<div class="tabs">' +
+    '<button type="button" class="tab' + (mode==="in" ? ' on' : '') + '" id="tab-in">Sign in</button>' +
+    '<button type="button" class="tab' + (mode==="up" ? ' on' : '') + '" id="tab-up">Create free account</button>' +
+  '</div>' +
+  '<form id="aform">' +
+  '<label for="a-email">Email</label>' +
+  '<input id="a-email" type="email" required autocomplete="email" placeholder="you@example.com">' +
+  '<label for="a-pass">Password</label>' +
+  '<input id="a-pass" type="password" required autocomplete="' + (mode==="in" ? "current-password" : "new-password") + '" placeholder="Your password">' +
+  (errText ? '<div class="err">' + errText + '</div>' : '') +
+  (okText ? '<div class="ok">' + okText + '</div>' : '') +
+  '<button class="save" type="submit">' + (mode==="in" ? "Sign in" : "Create my account") + '</button>' +
+  '<p class="hint" style="margin-top:14px">Use the same email and password as your DeafCanWork account — it is one account for the whole site. New here? “Create free account” makes one.</p>' +
+  '</form></div>';
+}
+
+function showAuth(errText, okText){
+  app.innerHTML = authHTML(errText, okText);
+  document.getElementById("tab-in").addEventListener("click", function(){ mode = "in"; showAuth(); });
+  document.getElementById("tab-up").addEventListener("click", function(){ mode = "up"; showAuth(); });
+  document.getElementById("aform").addEventListener("submit", async function(e){
+    e.preventDefault();
+    var email = document.getElementById("a-email").value.trim();
+    var pass = document.getElementById("a-pass").value;
+    if(mode === "in"){
+      var r = await sb.auth.signInWithPassword({ email: email, password: pass });
+      if(r.error){ showAuth("Sign-in did not work: " + esc(r.error.message) + "<br>Check the email and password and try again."); return; }
+      showForm(r.data.user);
+    } else {
+      var r2 = await sb.auth.signUp({ email: email, password: pass });
+      if(r2.error){ showAuth("That did not work: " + esc(r2.error.message)); return; }
+      if(r2.data && r2.data.session && r2.data.user){ showForm(r2.data.user); return; }
+      showAuth(null, "✅ Account created. We sent a confirmation link to <strong>" + esc(email) + "</strong> — tap it, then come back here and sign in.");
+      mode = "in";
+    }
+  });
+}
+
+function formHTML(p, email){
   return '<form id="tform" class="card">' +
+  '<p class="who">Signed in as ' + esc(email || "") + ' · <button type="button" class="signout" id="signout">Sign out</button></p>' +
   '<label for="f-name">Name to show employers</label>' +
   '<input id="f-name" type="text" maxlength="80" value="' + esc(p.display_name) + '" placeholder="Example: Alex R.">' +
   '<p class="hint">This can be just your first name and last initial if you prefer.</p>' +
@@ -89,20 +135,7 @@ function formHTML(p){
   '</form>';
 }
 
-async function main(){
-  if(!sb){
-    app.innerHTML = '<div class="card"><div class="err">This page could not load. Please check your connection and refresh.</div></div>';
-    return;
-  }
-  var sess = await sb.auth.getSession();
-  var user = sess && sess.data && sess.data.session ? sess.data.session.user : null;
-  if(!user){
-    app.innerHTML = '<div class="card"><h2 style="margin:0 0 8px;font-size:21px">First, sign in</h2>' +
-      '<p class="sub">The Talent Pool uses your free DeafCanWork account, so only you can edit your profile.</p>' +
-      '<p class="sub">Sign in (or create your free account) on the main page, then come back here.</p>' +
-      '<a class="bigbtn" href="/">Go to DeafCanWork — sign in</a></div>';
-    return;
-  }
+async function showForm(user){
   var r = await sb.from("talent_profiles").select("*").eq("user_id", user.id).maybeSingle();
   var p = r.data || { display_name:"", headline:"", skills:"", interests:"", location:"", remote_ok:false, about:"", is_visible:false, exists:false };
   if(r.data) p.exists = true;
@@ -110,7 +143,11 @@ async function main(){
     var pr = await sb.from("profiles").select("full_name, location").eq("id", user.id).maybeSingle();
     if(pr.data){ p.display_name = pr.data.full_name || ""; p.location = pr.data.location || ""; }
   }
-  app.innerHTML = formHTML(p);
+  app.innerHTML = formHTML(p, user.email);
+  document.getElementById("signout").addEventListener("click", async function(){
+    await sb.auth.signOut();
+    mode = "in"; showAuth(null, "You are signed out.");
+  });
   document.getElementById("tform").addEventListener("submit", async function(e){
     e.preventDefault();
     var msg = document.getElementById("msg");
@@ -152,6 +189,16 @@ async function main(){
       app.innerHTML = '<div class="card"><div class="ok">✅ Your profile has been removed.</div><p class="sub" style="margin-top:14px">Changed your mind? <a href="/talent-join.html">Create a new profile</a> any time.</p></div>';
     });
   }
+}
+
+async function main(){
+  if(!sb){
+    app.innerHTML = '<div class="card"><div class="err">This page could not load its sign-in tools. Please check your connection and refresh the page.</div></div>';
+    return;
+  }
+  var sess = await sb.auth.getSession();
+  var user = sess && sess.data && sess.data.session ? sess.data.session.user : null;
+  if(user){ showForm(user); } else { showAuth(); }
 }
 main();
 </script>
