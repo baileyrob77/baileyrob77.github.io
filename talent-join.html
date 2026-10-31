@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join the Talent Pool — DeafCanWork</title>
+<meta name="description" content="Add your free Talent Pool profile on DeafCanWork. You choose what shows. Employers never see your email, phone, or VP number.">
+<link rel="canonical" href="https://deafcanwork.com/talent-join.html">
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0b3d62;background:#f0f6fb}
+body{margin:0;padding:0}
+header{background:#0b3d62;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header a{color:#fff;text-decoration:none;font-weight:700}
+header nav a{font-weight:600;font-size:14px;margin-left:18px;opacity:.92}
+main{max-width:680px;margin:0 auto;padding:32px 20px 64px}
+h1{margin:0 0 6px;font-size:29px}
+.sub{color:#5a7a92;font-size:16px;line-height:1.6;margin:0 0 8px}
+.card{background:#fff;border:1px solid #d3e2ed;border-radius:16px;padding:28px;box-shadow:0 4px 16px #0b3d6211}
+.note{background:#e8f4fd;border:1px solid #bcd9ee;border-radius:12px;padding:14px 18px;font-size:14.5px;line-height:1.6;margin:18px 0 22px}
+label{display:block;font-weight:700;font-size:15px;margin:18px 0 5px}
+.hint{font-weight:400;color:#5a7a92;font-size:13.5px;margin:2px 0 0}
+input[type=text],textarea{width:100%;box-sizing:border-box;border:1px solid #c9dcea;border-radius:10px;padding:12px 14px;font-size:16px;font-family:inherit}
+textarea{min-height:110px;resize:vertical}
+.check{display:flex;gap:12px;align-items:flex-start;background:#f4f9fd;border:1px solid #d3e2ed;border-radius:12px;padding:16px;margin-top:14px}
+.check input{width:22px;height:22px;margin-top:2px;flex:none}
+.check .t{font-weight:700;font-size:15.5px}
+.check .d{color:#5a7a92;font-size:14px;line-height:1.55;margin-top:3px}
+.showbox{display:flex;gap:12px;align-items:flex-start;background:#fff7e0;border:2px solid #e8a317;border-radius:12px;padding:16px;margin-top:22px}
+.showbox input{width:24px;height:24px;margin-top:2px;flex:none}
+.save{display:inline-block;background:#e8a317;color:#3d2c00;font-weight:800;border:none;padding:15px 34px;border-radius:12px;margin-top:24px;font-size:16.5px;cursor:pointer;font-family:inherit}
+.save:hover{filter:brightness(1.05)}
+.del{background:none;border:none;color:#a33;font-weight:700;font-size:14.5px;cursor:pointer;margin-top:20px;padding:8px 0;font-family:inherit}
+.ok{background:#d9f2e4;color:#0d6b3f;border-radius:12px;padding:15px 18px;font-weight:600;line-height:1.6;margin-top:20px}
+.err{background:#fdecec;border:1px solid #f2b8b8;color:#8a2323;border-radius:12px;padding:15px 18px;line-height:1.6;margin-top:20px}
+.bigbtn{display:inline-block;background:#0b3d62;color:#fff;font-weight:800;text-decoration:none;padding:14px 30px;border-radius:12px;margin-top:14px}
+</style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+  <a href="/">🤟 DeafCanWork</a>
+  <nav>
+    <a href="/job.html">Jobs</a>
+    <a href="/talent.html">Talent Pool</a>
+  </nav>
+</header>
+<main>
+  <h1>Join the Talent Pool</h1>
+  <p class="sub">Your profile lets Deaf-friendly employers find <em>you</em>. Free forever — and <strong>you</strong> decide if it shows.</p>
+  <div class="note">🔒 <strong>What employers can never see here:</strong> your email, phone, VP number, or anything from your private account. If an employer is interested, DeafCanWork passes their message to you first. You reply only if you want to.</div>
+  <div id="app"><div class="card"><p class="sub">Loading…</p></div></div>
+</main>
+<script>
+var SUPABASE_URL = "https://vdxncfcgtguzmsncjovl.supabase.co";
+var SUPABASE_ANON_KEY = "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap";
+var app = document.getElementById("app");
+var sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});}
+
+function formHTML(p){
+  return '<form id="tform" class="card">' +
+  '<label for="f-name">Name to show employers</label>' +
+  '<input id="f-name" type="text" maxlength="80" value="' + esc(p.display_name) + '" placeholder="Example: Alex R.">' +
+  '<p class="hint">This can be just your first name and last initial if you prefer.</p>' +
+  '<label for="f-head">What work do you do?</label>' +
+  '<input id="f-head" type="text" maxlength="120" value="' + esc(p.headline) + '" placeholder="Example: Warehouse associate — forklift certified">' +
+  '<label for="f-skills">Your skills</label>' +
+  '<input id="f-skills" type="text" maxlength="300" value="' + esc(p.skills) + '" placeholder="Example: forklift, packing, inventory, cash register">' +
+  '<p class="hint">Separate skills with commas.</p>' +
+  '<label for="f-wants">Jobs you want</label>' +
+  '<input id="f-wants" type="text" maxlength="200" value="' + esc(p.interests) + '" placeholder="Example: warehouse, delivery, food service">' +
+  '<label for="f-loc">Where do you live?</label>' +
+  '<input id="f-loc" type="text" maxlength="80" value="' + esc(p.location) + '" placeholder="Example: Vancouver, WA">' +
+  '<div class="check"><input id="f-remote" type="checkbox"' + (p.remote_ok ? ' checked' : '') + '><div><div class="t">Open to remote work</div><div class="d">Employers can see you are willing to work from home.</div></div></div>' +
+  '<label for="f-about">About you</label>' +
+  '<textarea id="f-about" maxlength="1200" placeholder="A few sentences: your experience, what you are good at, anything an employer should know.">' + esc(p.about) + '</textarea>' +
+  '<div class="showbox"><input id="f-vis" type="checkbox"' + (p.is_visible ? ' checked' : '') + '><div><div class="t">Show my profile to employers</div><div class="d">ON: your profile appears in the public Talent Pool. OFF: only you can see it — you can turn it on any time.</div></div></div>' +
+  '<div id="msg"></div>' +
+  '<button class="save" type="submit">Save my profile</button>' +
+  (p.exists ? '<br><button class="del" type="button" id="delbtn">Remove my profile completely</button>' : '') +
+  '</form>';
+}
+
+async function main(){
+  if(!sb){
+    app.innerHTML = '<div class="card"><div class="err">This page could not load. Please check your connection and refresh.</div></div>';
+    return;
+  }
+  var sess = await sb.auth.getSession();
+  var user = sess && sess.data && sess.data.session ? sess.data.session.user : null;
+  if(!user){
+    app.innerHTML = '<div class="card"><h2 style="margin:0 0 8px;font-size:21px">First, sign in</h2>' +
+      '<p class="sub">The Talent Pool uses your free DeafCanWork account, so only you can edit your profile.</p>' +
+      '<p class="sub">Sign in (or create your free account) on the main page, then come back here.</p>' +
+      '<a class="bigbtn" href="/">Go to DeafCanWork — sign in</a></div>';
+    return;
+  }
+  var r = await sb.from("talent_profiles").select("*").eq("user_id", user.id).maybeSingle();
+  var p = r.data || { display_name:"", headline:"", skills:"", interests:"", location:"", remote_ok:false, about:"", is_visible:false, exists:false };
+  if(r.data) p.exists = true;
+  if(!r.data){
+    var pr = await sb.from("profiles").select("full_name, location").eq("id", user.id).maybeSingle();
+    if(pr.data){ p.display_name = pr.data.full_name || ""; p.location = pr.data.location || ""; }
+  }
+  app.innerHTML = formHTML(p);
+  document.getElementById("tform").addEventListener("submit", async function(e){
+    e.preventDefault();
+    var msg = document.getElementById("msg");
+    var vis = document.getElementById("f-vis").checked;
+    var name = document.getElementById("f-name").value.trim();
+    var head = document.getElementById("f-head").value.trim();
+    if(vis && (!name || !head)){
+      msg.innerHTML = '<div class="err">To show your profile, please fill in <strong>“Name to show employers”</strong> and <strong>“What work do you do?”</strong> first — employers need those two to understand who you are.</div>';
+      return;
+    }
+    var row = {
+      user_id: user.id,
+      display_name: name,
+      headline: head,
+      skills: document.getElementById("f-skills").value.trim(),
+      interests: document.getElementById("f-wants").value.trim(),
+      location: document.getElementById("f-loc").value.trim(),
+      remote_ok: document.getElementById("f-remote").checked,
+      about: document.getElementById("f-about").value.trim(),
+      is_visible: vis,
+      updated_at: new Date().toISOString()
+    };
+    var up = await sb.from("talent_profiles").upsert(row, { onConflict: "user_id" });
+    if(up.error){
+      msg.innerHTML = '<div class="err">Saving did not work: ' + esc(up.error.message) + '<br>Your writing is still on this page — please try again.</div>';
+      return;
+    }
+    msg.innerHTML = '<div class="ok">✅ Saved. ' + (vis
+      ? 'Your profile is <strong>ON</strong> — employers can now see it in the <a href="/talent.html">Talent Pool</a>.'
+      : 'Your profile is saved and <strong>OFF</strong> — only you can see it.') + '</div>';
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  var del = document.getElementById("delbtn");
+  if(del){
+    del.addEventListener("click", async function(){
+      if(!window.confirm("Remove your Talent Pool profile completely? You can always create a new one later.")) return;
+      var d = await sb.from("talent_profiles").delete().eq("user_id", user.id);
+      if(d.error){ alert("That did not work: " + d.error.message); return; }
+      app.innerHTML = '<div class="card"><div class="ok">✅ Your profile has been removed.</div><p class="sub" style="margin-top:14px">Changed your mind? <a href="/talent-join.html">Create a new profile</a> any time.</p></div>';
+    });
+  }
+}
+main();
+</script>
+</body>
+</html>
