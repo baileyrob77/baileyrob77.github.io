@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talent Pool — DeafCanWork</title>
+<meta name="description" content="Browse Deaf, hard-of-hearing, and DeafBlind job seekers who chose to be listed. Free for employers. Contact stays private — DeafCanWork connects you.">
+<link rel="canonical" href="https://deafcanwork.com/talent.html">
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0b3d62;background:#f0f6fb}
+body{margin:0;padding:0}
+header{background:#0b3d62;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header a{color:#fff;text-decoration:none;font-weight:700}
+header .tag{font-size:13px;opacity:.85;font-weight:400}
+header nav a{font-weight:600;font-size:14px;margin-left:18px;opacity:.92}
+main{max-width:860px;margin:0 auto;padding:32px 20px 64px}
+h1{margin:0 0 6px;font-size:30px}
+.sub{color:#5a7a92;font-size:16px;line-height:1.6;margin:0 0 8px}
+.note{background:#e8f4fd;border:1px solid #bcd9ee;border-radius:12px;padding:14px 18px;font-size:14.5px;line-height:1.6;margin:18px 0 24px}
+.search{width:100%;box-sizing:border-box;border:1px solid #c9dcea;border-radius:12px;padding:14px 16px;font-size:16px;font-family:inherit;margin:6px 0 22px}
+.card{background:#fff;border:1px solid #d3e2ed;border-radius:16px;padding:24px 28px;box-shadow:0 4px 16px #0b3d6211;margin-bottom:18px}
+.card h2{margin:0 0 2px;font-size:22px}
+.headline{font-size:16px;font-weight:600;color:#2c5a7c;margin-bottom:4px}
+.meta{color:#5a7a92;font-size:14px;margin-bottom:10px}
+.badge{display:inline-block;background:#e8f4fd;color:#0b3d62;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin:0 6px 6px 0}
+.badge.remote{background:#d9f2e4;color:#0d6b3f}
+.skills{margin:8px 0}
+.about{line-height:1.65;margin:10px 0 4px;white-space:pre-wrap}
+.wants{font-size:14.5px;color:#2c5a7c;margin:8px 0 2px}
+.connect{display:inline-block;background:#e8a317;color:#3d2c00;font-weight:800;text-decoration:none;padding:13px 26px;border-radius:12px;margin-top:14px;font-size:15.5px}
+.connect:hover{filter:brightness(1.05)}
+.empty{background:#fff;border:1px dashed #b9cfdf;border-radius:16px;padding:36px 28px;text-align:center;color:#2c5a7c;line-height:1.7}
+.empty a{color:#0b3d62;font-weight:700}
+.err{background:#fdecec;border:1px solid #f2b8b8;color:#8a2323;border-radius:12px;padding:16px 20px;line-height:1.6}
+.count{color:#5a7a92;font-size:14px;margin:0 0 14px}
+footer{max-width:860px;margin:0 auto;padding:0 20px 40px;color:#5a7a92;font-size:13.5px;line-height:1.7}
+footer a{color:#0b3d62;font-weight:600}
+</style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z1uiusgt6v");
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+  <a href="/">🤟 DeafCanWork</a>
+  <nav>
+    <a href="/job.html">Jobs</a>
+    <a href="/employers.html">For Employers</a>
+    <a href="/talent-join.html">Join the Pool</a>
+  </nav>
+</header>
+<main>
+  <h1>Deaf Talent Pool</h1>
+  <p class="sub">Deaf, hard-of-hearing, and DeafBlind job seekers who <strong>chose</strong> to be listed here. Browsing is free.</p>
+  <div class="note">🔒 <strong>Contact info stays private.</strong> Profiles never show email, phone, or VP numbers. See someone who fits your opening? Tap <strong>Ask DeafCanWork to connect you</strong> and we pass your message to them — they reply only if they want to.</div>
+  <input id="q" class="search" type="search" placeholder="Search skills, job titles, or places — example: warehouse, cook, Portland" aria-label="Search the talent pool">
+  <p class="count" id="count"></p>
+  <div id="app"><p class="sub">Loading profiles…</p></div>
+</main>
+<footer>
+  Job seeker? <a href="/talent-join.html">Add your profile to the pool</a> — free forever, and you control whether it shows.<br>
+  Employer hiring now? <a href="/post-a-job.html">Post a job</a> — first listing free for 30 days.
+</footer>
+<script>
+var SUPABASE_URL = "https://vdxncfcgtguzmsncjovl.supabase.co";
+var SUPABASE_ANON_KEY = "sb_publishable_77Lm7XoBtEBCrcfjcsGb1g_wZSk0Wap";
+var app = document.getElementById("app");
+var countEl = document.getElementById("count");
+var all = [];
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});}
+
+function connectHref(p){
+  var subject = "Talent Pool: please connect me with " + (p.display_name || "a candidate");
+  var body = "Hi DeafCanWork,\n\nPlease pass this message to " + (p.display_name || "the candidate") +
+    " (" + (p.headline || "Talent Pool profile") + ").\n\n" +
+    "Your name:\nYour company:\nThe job you are hiring for:\n\nYour message:\n\n";
+  return "mailto:DeafWork2026@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+}
+
+function render(list){
+  countEl.textContent = list.length === 1 ? "1 candidate listed" : list.length + " candidates listed";
+  if(!list.length){
+    app.innerHTML = '<div class="empty">No profiles match that search.<br>Try a shorter word — or <a href="/post-a-job.html">post your job</a> and let candidates come to you.</div>';
+    return;
+  }
+  app.innerHTML = list.map(function(p){
+    var skills = (p.skills || "").split(",").map(function(s){return s.trim();}).filter(Boolean);
+    return '<div class="card">' +
+      '<h2>' + esc(p.display_name || "DeafCanWork job seeker") + '</h2>' +
+      (p.headline ? '<div class="headline">' + esc(p.headline) + '</div>' : '') +
+      '<div class="meta">' + esc(p.location || "") + (p.location && p.remote_ok ? ' · ' : '') + (p.remote_ok ? 'Open to remote work' : '') + '</div>' +
+      (p.remote_ok ? '<span class="badge remote">Remote OK</span>' : '') +
+      (skills.length ? '<div class="skills">' + skills.map(function(s){return '<span class="badge">' + esc(s) + '</span>';}).join("") + '</div>' : '') +
+      (p.about ? '<div class="about">' + esc(p.about) + '</div>' : '') +
+      (p.interests ? '<div class="wants"><strong>Looking for:</strong> ' + esc(p.interests) + '</div>' : '') +
+      '<a class="connect" href="' + connectHref(p) + '">Ask DeafCanWork to connect you</a>' +
+      '</div>';
+  }).join("");
+}
+
+async function main(){
+  if(!window.supabase){
+    app.innerHTML = '<div class="err">This page could not load. Please check your connection and refresh.</div>';
+    return;
+  }
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var r = await sb.from("talent_profiles")
+    .select("display_name, headline, skills, interests, location, remote_ok, about, created_at")
+    .eq("is_visible", true)
+    .order("created_at", { ascending: false });
+  if(r.error){
+    app.innerHTML = '<div class="err">Profiles could not load right now. Please try again in a few minutes.</div>';
+    return;
+  }
+  all = r.data || [];
+  if(!all.length){
+    countEl.textContent = "";
+    app.innerHTML = '<div class="empty"><strong>The pool is just getting started.</strong><br>No candidates have turned their profile on yet — new profiles appear here as job seekers opt in.<br><br><a href="/post-a-job.html">Post a job instead</a> — your first listing is free for 30 days, and seekers apply to you.</div>';
+    return;
+  }
+  render(all);
+  document.getElementById("q").addEventListener("input", function(e){
+    var q = e.target.value.trim().toLowerCase();
+    if(!q){ render(all); return; }
+    render(all.filter(function(p){
+      return [p.display_name, p.headline, p.skills, p.interests, p.location, p.about]
+        .join(" ").toLowerCase().indexOf(q) > -1;
+    }));
+  });
+}
+main();
+</script>
+</body>
+</html>
