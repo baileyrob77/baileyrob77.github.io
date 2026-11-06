@@ -64,7 +64,7 @@ footer a{color:#0b3d62;font-weight:600}
 </main>
 <footer>
   Job seeker? <a href="/talent-join.html">Add your profile to the pool</a> — free forever, and you control whether it shows.<br>
-  Employer hiring now? <a href="/post-a-job.html">Post a job</a> — first listing free for 30 days.
+  Employer hiring now? <a href="/post-a-job.html">Post a job</a> — first listing free for 7 days.
 </footer>
 <script>
 var SUPABASE_URL = "https://vdxncfcgtguzmsncjovl.supabase.co";
@@ -121,7 +121,7 @@ async function main(){
   all = r.data || [];
   if(!all.length){
     countEl.textContent = "";
-    app.innerHTML = '<div class="empty"><strong>The pool is just getting started.</strong><br>No candidates have turned their profile on yet — new profiles appear here as job seekers opt in.<br><br><a href="/post-a-job.html">Post a job instead</a> — your first listing is free for 30 days, and seekers apply to you.</div>';
+    app.innerHTML = '<div class="empty"><strong>The pool is just getting started.</strong><br>No candidates have turned their profile on yet — new profiles appear here as job seekers opt in.<br><br><a href="/post-a-job.html">Post a job instead</a> — your first listing is free for 7 days, and seekers apply to you.</div>';
     return;
   }
   render(all);
