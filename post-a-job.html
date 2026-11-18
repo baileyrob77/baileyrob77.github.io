@@ -73,7 +73,7 @@ footer{text-align:center;padding:32px;color:#7a94a8;font-size:14px}
 
 <div class="hero">
   <h1>Post a Job</h1>
-  <p>Reach Deaf, hard-of-hearing, and DeafBlind talent. <strong>First listing free for 30 days</strong> — then $49 standard, $99 featured, or the $149/mo subscription.</p>
+  <p>Reach Deaf, hard-of-hearing, and DeafBlind talent. <strong>First listing free for 30 days</strong> — then $49 standard, $99 featured, or the $149/mo subscription. <strong>Nonprofits post free, always.</strong></p>
 </div>
 
 <div class="steps">
@@ -96,8 +96,10 @@ footer{text-align:center;padding:32px;color:#7a94a8;font-size:14px}
           <span class="hint">We'll contact you here once your listing is live.</span>
         </label>
       </div>
-      <label class="checkrow"><input type="checkbox" id="f_nonprofit"/> <strong>We're a nonprofit organization</strong></label>
-      <div class="hint" style="margin-top:-16px">Nonprofits post free — no payment required, ever.</div>
+      <div style="background:#e8f5e9;border:2px solid #2a9d5a;border-radius:10px;padding:14px 16px;margin:4px 0 16px">
+        <label class="checkrow" style="margin:0"><input type="checkbox" id="f_nonprofit"/> <strong>We're a nonprofit organization — post free, no payment ever</strong></label>
+        <div style="font-size:13px;color:#1b5e20;margin-top:8px">Tick this box and the payment section below disappears. Nonprofits never pay on DeafCanWork.</div>
+      </div>
       <label>Job Title *
         <input id="f_title" required placeholder="e.g., Customer Support Rep, ASL Interpreter"/>
       </label>
@@ -110,11 +112,13 @@ footer{text-align:center;padding:32px;color:#7a94a8;font-size:14px}
             <option>Full-time</option>
             <option>Part-time</option>
             <option>Contract</option>
+            <option>Volunteer</option>
           </select>
         </label>
       </div>
       <label class="checkrow"><input type="checkbox" id="f_remote"/> This is a remote position</label>
-      <label>Pay Range * <span class="hint" style="display:inline">Required — pay transparency is the law in 16 states + DC and for most remote roles.</span></label>
+      <div id="paySection">
+      <label>Pay Range * <span class="hint" style="display:inline">Required — pay transparency is the law in 16 states + DC and for most remote roles. Volunteer roles skip this: pick Volunteer above and this section disappears.</span></label>
       <div class="row">
         <input id="f_paymin" type="number" min="0" step="0.01" required placeholder="Min — e.g., 25"/>
         <input id="f_paymax" type="number" min="0" step="0.01" required placeholder="Max — e.g., 30"/>
@@ -125,6 +129,7 @@ footer{text-align:center;padding:32px;color:#7a94a8;font-size:14px}
           <option value="salary">Per year (salary)</option>
         </select>
       </label>
+      </div>
       <label>Job Description *
         <textarea id="f_desc" rows="6" required placeholder="What will this person do? What qualifications do you need? What makes your workplace Deaf-friendly?"></textarea>
       </label>
@@ -202,6 +207,13 @@ $("f_nonprofit").addEventListener("change", () => {
   $("planSection").style.display = $("f_nonprofit").checked ? "none" : "block";
 });
 
+// Volunteer toggle: volunteer roles have no pay — hide pay fields, skip validation
+function updateVolunteer() {
+  $("paySection").style.display = $("f_jobtype").value === "Volunteer" ? "none" : "block";
+}
+$("f_jobtype").addEventListener("change", updateVolunteer);
+updateVolunteer();
+
 // Plan radio visual toggle
 document.querySelectorAll('input[name="plan"]').forEach(r => {
   r.addEventListener("change", () => {
@@ -238,7 +250,7 @@ function buildMailto(d) {
     "Job title: " + d.title,
     "Location: " + d.location + (d.remote ? " (Remote)" : ""),
     "Job type: " + d.jobtype,
-    "Pay: $" + d.paymin + "–$" + d.paymax + (d.paytype === "salary" ? "/yr" : "/hr"),
+    "Pay: " + (d.jobtype === "Volunteer" ? "Volunteer (unpaid)" : "$" + d.paymin + "–$" + d.paymax + (d.paytype === "salary" ? "/yr" : "/hr")),
     "Plan: " + d.plan,
     "",
     "Description:",
@@ -271,6 +283,7 @@ $("jobForm").addEventListener("submit", async (e) => {
     nonprofit: $("f_nonprofit").checked,
     plan: $("f_nonprofit").checked ? "free" : ((document.querySelector('input[name="plan"]:checked') || {}).value || "free"),
   };
+  const isVolunteer = d.jobtype === "Volunteer";
 
   // --- Required-field validation (mirrors compliance checker: no incomplete listings) ---
   const missing = [];
@@ -279,8 +292,8 @@ $("jobForm").addEventListener("submit", async (e) => {
   else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) { showErr("Please enter a valid work email address."); return; }
   if (!d.title) missing.push("Job title");
   if (!d.remote && !d.location) missing.push("Location (or check Remote)");
-  if (!d.paymin || !d.paymax) missing.push("Pay range (min and max)");
-  else if (Number(d.paymax) < Number(d.paymin)) { showErr("Pay max must be equal to or higher than pay min."); return; }
+  if (!isVolunteer && (!d.paymin || !d.paymax)) missing.push("Pay range (min and max)");
+  else if (!isVolunteer && Number(d.paymax) < Number(d.paymin)) { showErr("Pay max must be equal to or higher than pay min."); return; }
   if (!d.desc) missing.push("Job description");
   if (!d.apply) missing.push("Application URL or email");
   if (missing.length) { showErr("Please complete the required fields: <strong>" + missing.join(", ") + "</strong>."); return; }
@@ -321,8 +334,8 @@ $("jobForm").addEventListener("submit", async (e) => {
       employer_id,
       location: d.remote ? (d.location || "Remote") : d.location,
       application_url: d.apply,
-      pay_min: Number(d.paymin),
-      pay_max: Number(d.paymax),
+      pay_min: isVolunteer ? null : Number(d.paymin),
+      pay_max: isVolunteer ? null : Number(d.paymax),
       description,
       accommodations,
       // New employer submissions are held for Rob's review — never auto-published
